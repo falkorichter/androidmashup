@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, OpenStreetMapViewer</string>
+    <string name="app_name">OpenFONMaps</string>
+    <string name="app_name_itemizedoverlay">OSMViewer ItemizedOverlay</string>
+    
+    <string name="unknown">Unknown</string>
+<string name="mashup">Mashup this map!</string>
+<string name="go">Find Fonspots</string>
+<string name="possibleViews">Possible views</string>
+
+<string name="OSMARENDER">OSMARENDER</string>         
+<string name="MAPNIK">MAPNIK</string>             
+<string name="CYCLEMAP">CYCLEMAP</string>            
+<string name="OPENARIELMAP">OPENARIELMAP</string>
+<string name="CLOUDMADESMALLTILES">CLOUDMADESMALLTILES</string>
+<string name="CLOUDMADESTANDARDTILES">CLOUDMADESTANDARDTILES</string>
+
+<string name="zoomIn">Zoom in</string>
+<string name="zoomOut">Zoom Out</string>
+<string name="deleteDatabase">clear Database</string>
+<string name="zoom">Zoom</string>
+<string name="noRadarInstalled">No Radar Application Installed</string>
+</resources>
