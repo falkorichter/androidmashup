@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mashupData
+	dataBaseId="1"
+	mashupIntentCount="2"
+	applicationCount="4">
+	<mashupIntents>
+		<intent
+			id="1"
+			action="com.androidMashup.mapCenter"
+			title="Map Point"
+			icon="">
+			<description>standart map point</description>
+			<category>COM.MASHUP.MAPPOINT</category>
+			<extra
+				name="longitude"
+				type="long"
+				mandatory="true"
+				description="long number" />
+			<extra
+				name="latitude"
+				type="long"
+				mandatory="true"
+				description="long number" />
+		</intent>
+		<intent
+			id="2"
+			action="com.androidMashup.MapView"
+			title="Map View"
+			icon="">
+			<description>map view</description>
+			<category>COM.MASHUP.MAPVIEW</category>
+			<extra
+				name="longitude"
+				type="long"
+				mandatory="true"
+				description="long number" />
+			<extra
+				name="latitude"
+				type="long"
+				mandatory="true"
+				description="long number" />
+			<extra
+				name="zoomLevel"
+				type="int"
+				mandatory="true"
+				description="a Integer number" />
+			<extra
+				name="mapMode"
+				type="String"
+				mandatory="false"
+				description="a string representing the mapmode" />
+		</intent>
+	</mashupIntents>
+	<mashupApplications>
+		<application
+			name="FONMaps"
+			package="com.fon"
+			url="http://www.fon.com"
+			icon=""
+			apkUrl=""
+			developerEmail="falko@briefhansa.de"
+			developerUrl="http://www.volkersfreunde.de"
+			id="1">
+			<intent
+				action="com.androidMashup.mapCenter"
+				id="1"
+				mashup="1" />
+			<intent
+				action="com.androidMashup.MapView"
+				id="2"
+				mashup="1" />
+		</application>
+		<application
+			name="Panoramio"
+			package="com.google.android.panoramio"
+			url="http://www.Panoramio.com"
+			icon=""
+			apkUrl=""
+			developerEmail="falko@briefhansa.de"
+			developerUrl="http://www.volkersfreunde.de"
+			id="2">
+			<intent
+				action="com.androidMashup.mapCenter"
+				id="1"
+				mashup="1" />
+		</application>
+		<application
+			name="Radar"
+			package="com.android.radar"
+			url=""
+			icon=""
+			apkUrl=""
+			developerEmail="falko@briefhansa.de"
+			developerUrl="http://www.volkersfreunde.de"
+			id="3">
+			<intent
+				action="com.androidMashup.mapCenter"
+				id="1"
+				mashup="1" />
+			<intent
+				action="com.google.android.radar.SHOW_RADAR"
+				mashup="0">
+				<description>Open The Radar app in the old way</description>
+				<extra
+					name="latitude"
+					type="float"
+					mandatory="true"
+					description="a float Number" />
+				<extra
+					name="longitude"
+					type="float"
+					mandatory="true"
+					description="a float Number" />
+			</intent>
+		</application>
+		<application
+			name="TestAPP"
+			package="tes.test.test"
+			url=""
+			icon=""
+			apkUrl=""
+			developerEmail="falko@briefhansa.de"
+			developerUrl="http://www.volkersfreunde.de"
+			id="4" />
+	</mashupApplications>
+</mashupData>
