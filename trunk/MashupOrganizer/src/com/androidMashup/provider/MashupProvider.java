@@ -46,10 +46,10 @@ public class MashupProvider extends ContentProvider {
 	private static final UriMatcher	uriMatcher;
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		uriMatcher.addURI("com.mashup.mashupdataprovider", "intent", ALL_INTENTS);
-		uriMatcher.addURI("com.mashup.mashupdataprovider", "intent/#", SINGLE_INTENT);
-		uriMatcher.addURI("com.mashup.mashupdataprovider", "application", ALL_APPLICATIONS);
-		uriMatcher.addURI("com.mashup.mashupdataprovider", "application/#", SINGLE_APPLICATION);
+		uriMatcher.addURI("content://com.mashup.mashupdataprovider", "intent", ALL_INTENTS);
+		uriMatcher.addURI("content://com.mashup.mashupdataprovider", "intent/#", SINGLE_INTENT);
+		uriMatcher.addURI("content://com.mashup.mashupdataprovider", "application", ALL_APPLICATIONS);
+		uriMatcher.addURI("content://com.mashup.mashupdataprovider", "application/#", SINGLE_APPLICATION);
 	}
 	
 	public MashupProvider() {
@@ -80,7 +80,6 @@ public class MashupProvider extends ContentProvider {
 	
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -91,6 +90,7 @@ public class MashupProvider extends ContentProvider {
 	@Override
 	public boolean onCreate() {
 		mDbAdapter = MashupDbAdapter.getInstance(getContext());
+		mDbAdapter.open();
 		return true;
 	}
 	
@@ -116,53 +116,15 @@ public class MashupProvider extends ContentProvider {
 				break;
 		}
 		
-		// if(uri == CONTENT_INTENT){
-		// qBuilder.setTables(MashupDbAdapter.DATABASE_INTENTS_TABLE);
-		// }
-		// else if (uri == CONTENT_APPLICATION) {
-		// qBuilder.setTables(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE);
-		// qBuilder.appendWhereEscapeString(MashupDbAdapter.APPLICATION_INSTALLED
-		// + "=1");
-		// }
-		
-		mDbAdapter.open();
 		Cursor c = qBuilder
 				.query(mDbAdapter.getSqliteDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
-		try {
-			mDbAdapter.close();
-		}
-		catch (Exception e) {
-		}
-		return c;
 		
-		// Cursor value= null;
-		// try{
-		// if(uri == CONTENT_INTENT){
-		// mDbAdapter.open();
-		// ArrayList<MashupIntent> allIntents = mDbAdapter.getAllIntents();
-		// for ( MashupIntent mashupIntent : allIntents ) {
-		// Log.i(mashupIntent.action+" found");
-		// }
-		//				
-		// value =
-		// mDbAdapter.provideIntents(projection,selection,selectionArgs,sortOrder);
-		// }
-		// else if (uri == CONTENT_APPLICATION) {
-		// mDbAdapter.open();
-		// value =
-		// mDbAdapter.provideApplications(projection,selection,selectionArgs,sortOrder);
-		// }
-		// }
-		// finally{
-		// try{ mDbAdapter.close(); } catch (Exception e) { }
-		// }
-		// return value;
+		return c;
 		
 	}
 	
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }
