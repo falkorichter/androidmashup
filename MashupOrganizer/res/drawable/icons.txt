@@ -1,0 +1,8 @@
+home:
+plus:
+question mark:
+/home/fri/Dropbox/01_uni/06_bachelor/icons/icons/PNG
+
+ui-combo-box.png (preferences)
+/home/fri/Dropbox/01_uni/06_bachelor/icons/fugue-icons-2.1.7/icons
+

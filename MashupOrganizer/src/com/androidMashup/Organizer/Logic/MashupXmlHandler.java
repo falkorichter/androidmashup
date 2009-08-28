@@ -17,8 +17,8 @@ import com.androidMashup.provider.MashupProvider;
 public class MashupXmlHandler extends DefaultHandler {
 	
 	private final MashupDbAdapter	db;
-	private MashupApplication		app					= null;
-	private MashupIntent			intent				= null;
+	private MashupApplication		newApplication		= null;
+	private MashupIntent			newIntent			= null;
 	private boolean					mashupData			= false;
 	private boolean					mashupIntents		= false;
 	private boolean					mashupApplications	= false;
@@ -54,8 +54,12 @@ public class MashupXmlHandler extends DefaultHandler {
 	 */
 	@Override
 	public void characters(char ch[], int start, int length) {
-		if (description && intent != null) {
-			intent.description = new String(ch);
+		if (description && newIntent != null) {
+			newIntent.description = new String(ch).substring(start, start + length);
+			description = false;
+		}
+		if (description && newApplication != null) {
+			newApplication.description = new String(ch).substring(start, start + length);
 			description = false;
 		}
 	}
@@ -99,18 +103,18 @@ public class MashupXmlHandler extends DefaultHandler {
 	public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
 		
 		if (mashupData && mashupIntents && localName.equals("intent")) {
-			insertCount += db.updateOrInsertMashupIntent(intent);
-			intent = null;
+			insertCount += db.updateOrInsertMashupIntent(newIntent);
+			newIntent = null;
 		}
 		else if (mashupData && mashupApplications && localName.equals("application")) {
 			
-			insertCount += db.updateOrInsertMashupApplication(app);
+			insertCount += db.updateOrInsertMashupApplication(newApplication);
 			
 			for ( int i = 0 ; i < applicationIntentRelationIds.size() ; i++ ) {
-				insertCount += db.updateOrInsertRelation(applicationIntentRelationIds.get(i), app.webId);
+				insertCount += db.updateOrInsertRelation(applicationIntentRelationIds.get(i), newApplication.webId);
 			}
 			
-			app = null;
+			newApplication = null;
 			applicationIntentRelationIds.clear();
 		}
 		
@@ -152,11 +156,11 @@ public class MashupXmlHandler extends DefaultHandler {
 		}
 		else if (mashupData && mashupIntents) {
 			if (localName.equals("intent")) {
-				intent = new MashupIntent();
-				intent.action = atts.getValue("action");
-				intent.title = atts.getValue("title");
-				intent.icon = atts.getValue("icon");
-				intent.webId = Long.parseLong(atts.getValue("id"));
+				newIntent = new MashupIntent();
+				newIntent.action = atts.getValue("action");
+				newIntent.title = atts.getValue("title");
+				newIntent.icon = atts.getValue("icon");
+				newIntent.webId = Long.parseLong(atts.getValue("id"));
 				intentWebIds.add(Long.parseLong(atts.getValue("id")));
 				
 			}
@@ -166,19 +170,22 @@ public class MashupXmlHandler extends DefaultHandler {
 		}
 		else if (mashupData && mashupApplications) {
 			if (localName.equals("application")) {
-				app = new MashupApplication();
-				app.name = atts.getValue("name");
-				app.applicationPackage = atts.getValue("package");
-				app.url = atts.getValue("url");
-				app.icon = atts.getValue("icon");
-				app.apkUrl = atts.getValue("apkUrl");
-				app.developerEmail = atts.getValue("developerEmail");
-				app.developerUrl = atts.getValue("developerUrl");
-				app.webId = Long.parseLong(atts.getValue("id"));
+				newApplication = new MashupApplication();
+				newApplication.name = atts.getValue("name");
+				newApplication.applicationPackage = atts.getValue("package");
+				newApplication.url = atts.getValue("url");
+				newApplication.icon = atts.getValue("icon");
+				newApplication.apkUrl = atts.getValue("apkUrl");
+				newApplication.developerEmail = atts.getValue("developerEmail");
+				newApplication.developerUrl = atts.getValue("developerUrl");
+				newApplication.webId = Long.parseLong(atts.getValue("id"));
 				applicationWebIds.add(Long.parseLong(atts.getValue("id")));
 			}
 			else if (localName.equals("intent") && atts.getValue("mashup").equals("1")) {
 				applicationIntentRelationIds.add(Long.parseLong(atts.getValue("id")));
+			}
+			else if (localName.equals("description")) {
+				description = true;
 			}
 		}
 	}

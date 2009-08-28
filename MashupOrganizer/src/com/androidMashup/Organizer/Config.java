@@ -13,8 +13,10 @@ public class Config {
 		}
 	}
 	
-	public static final String	USER_PREFERENCE	= "USER_PREFERENCES";
+	public static final String	USER_PREFERENCE		= "USER_PREFERENCES";
 	
 	public static final String	PREF_CONSOLE_TEXT	= "PREF_CONSOLE";
+	
+	public static final String	PREF_FIRST_STARTUP	= "PREF_FIRST_STARTUP";
 	
 }

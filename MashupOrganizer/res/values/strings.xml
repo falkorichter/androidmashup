@@ -4,4 +4,5 @@
     <string name="app_name">Mashup Organizer</string>
 <string name="toast_somethingWentTerriblyWrong">Something went terribly wrong, the apllication had to close. Try to open it again.</string>
 
+<string name="ApplicationsTab_selectIntent_Spinner">Select a mashup</string>
 </resources>

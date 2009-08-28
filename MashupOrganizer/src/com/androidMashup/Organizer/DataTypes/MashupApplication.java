@@ -11,6 +11,7 @@ public class MashupApplication {
 	public String	developerEmail;
 	public String	developerUrl;
 	public boolean	installed;
+	public String	description;
 	
 	public MashupApplication() {
 	}

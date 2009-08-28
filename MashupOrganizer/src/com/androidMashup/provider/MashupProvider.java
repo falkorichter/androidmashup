@@ -22,6 +22,7 @@ public class MashupProvider extends ContentProvider {
 	public static final String		APPLICATION_PACKAGE			= "applicationPackage";
 	public static final String		APPLICATION_URL				= "url";
 	public static final String		APPLICATION_WEB_ID			= "_web_id";
+	public static final String		APPLICATION_DESCRIPTION		= "description";
 	
 	public static final String		INTENT_ACTION				= "action";
 	public static final String		INTENT_DESCRIPTION			= "description";
@@ -44,6 +45,7 @@ public class MashupProvider extends ContentProvider {
 	private static final int		ALL_APPLICATIONS			= 4;
 	
 	private static final UriMatcher	uriMatcher;
+	
 	static {
 		uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		uriMatcher.addURI("content://com.mashup.mashupdataprovider", "intent", ALL_INTENTS);
