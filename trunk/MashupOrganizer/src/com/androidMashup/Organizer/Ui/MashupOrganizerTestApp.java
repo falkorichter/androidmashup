@@ -103,7 +103,7 @@ public class MashupOrganizerTestApp extends Activity implements OnClickListener 
 					MashupDbAdapter db = MashupDbAdapter.getInstance(getApplicationContext());
 					db.open();
 					managedCursor = db
-							.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, new String[] { MashupProvider.APPLICATION_NAME, MashupProvider.APPLICATION_PACKAGE }, null, null, null, null, null, null);
+							.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, null, null, null, null, null, null);
 					
 					console.setText(console.getText() + "\n" + managedCursor.getCount() + "items found");
 					

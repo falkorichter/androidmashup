@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:isScrollContainer="true"
+	android:padding="5dip">
+
+	<Button
+		android:layout_height="wrap_content"
+		android:autoText="true"
+		android:id="@+id/UpdateButton"
+		android:layout_width="fill_parent"
+		android:text="update"></Button>
+	<Button
+		android:layout_height="wrap_content"
+		android:autoText="true"
+		android:id="@+id/LoadApps"
+		android:layout_width="fill_parent"
+		android:text="load"></Button>
+
+	<Button
+		android:id="@+id/FindInstalledApps"
+		android:text="findInstalledApps"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:autoText="true"></Button>
+	
+</LinearLayout>
