@@ -268,7 +268,7 @@ public class MashupDbAdapter {
 			}
 			while (all.moveToNext());
 		}
-		
+		all.close();
 		return applications;
 	}
 	
@@ -297,6 +297,7 @@ public class MashupDbAdapter {
 			}
 			while (all.moveToNext());
 		}
+		all.close();
 		return intents;
 	}
 	
@@ -421,10 +422,12 @@ public class MashupDbAdapter {
 			mDb.insert(DATABASE_RELATION_TABLE, null, initialValues);
 			Log.i("inserting relation beetween intent(webId): '" + intentId + "' and application(webId) "
 					+ applicationId);
+			entryExists.close();
 			return 1;
 		}
 		Log.i("relation beetween intent(webId): '" + intentId + "' and application(webId) " + applicationId
 				+ " allready exists");
+		entryExists.close();
 		return 0;
 	}
 	// public Cursor fetchApplication(long rowId) throws SQLException {
