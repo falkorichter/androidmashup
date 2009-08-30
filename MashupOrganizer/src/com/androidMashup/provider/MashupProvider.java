@@ -23,6 +23,7 @@ public class MashupProvider extends ContentProvider {
 	public static final String		APPLICATION_URL				= "url";
 	public static final String		APPLICATION_WEB_ID			= "_web_id";
 	public static final String		APPLICATION_DESCRIPTION		= "description";
+	public static final String		APPLICATION_ACTIVITY_CLASS	= "activity_class";
 	
 	public static final String		INTENT_ACTION				= "action";
 	public static final String		INTENT_DESCRIPTION			= "description";
@@ -31,6 +32,7 @@ public class MashupProvider extends ContentProvider {
 	public static final String		INTENT_KEY_ROWID			= "_id";
 	public static final String		INTENT_TITLE				= "title";
 	public static final String		INTENT_WEB_ID				= "_web_id";
+	public static final String		INTENT_APPLICATIONCOUNT		= "applicationCount";
 	
 	public static final Uri			CONTENT_URI					= Uri.parse("content://com.mashup.mashupdataprovider");
 	public static final Uri			CONTENT_INTENT				= Uri

@@ -17,7 +17,7 @@
 		<activity
 			android:label="@string/app_name"
 			android:theme="@android:style/Theme.Black"
-			android:name=".Ui.MashupOrganizer">
+			android:name=".Ui.MashupOrganizer" android:launchMode="singleTop">
 			<intent-filter>
 				<action
 					android:name="android.intent.action.MAIN" />

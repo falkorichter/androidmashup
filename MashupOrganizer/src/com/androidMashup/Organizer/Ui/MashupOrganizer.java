@@ -24,9 +24,7 @@ public class MashupOrganizer extends TabActivity {
 		tabHost.addTab(tabHost.newTabSpec("preferences").setIndicator("preferences", getResources()
 				.getDrawable(R.drawable.preferences)).setContent(new Intent(this, Preferences.class)));
 		
-		// This tab sets the intent flag so that it is recreated each time
-		// the tab is clicked.
-		tabHost.addTab(tabHost.newTabSpec("test").setIndicator("tests")
-				.setContent(new Intent(this, MashupOrganizerTestApp.class)));
+		// tabHost.addTab(tabHost.newTabSpec("test").setIndicator("tests")
+		// .setContent(new Intent(this, MashupOrganizerTestApp.class)));
 	}
 }

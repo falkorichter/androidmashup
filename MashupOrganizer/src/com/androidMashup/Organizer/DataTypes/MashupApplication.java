@@ -12,6 +12,7 @@ public class MashupApplication {
 	public String	developerUrl;
 	public boolean	installed;
 	public String	description;
+	public String	activityClass;
 	
 	public MashupApplication() {
 	}

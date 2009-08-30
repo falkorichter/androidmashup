@@ -1,6 +1,5 @@
 package com.androidMashup.Organizer.Logic;
 
-import java.io.InvalidClassException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,18 +8,20 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.database.SQLException;
 
 import com.androidMashup.Organizer.Config;
 import com.androidMashup.Organizer.DataTypes.MashupApplication;
 import com.androidMashup.Organizer.DataTypes.MashupIntent;
+import com.androidMashup.provider.MashupProvider;
 
 public class DatabaseHandler {
 	
@@ -30,11 +31,11 @@ public class DatabaseHandler {
 	private final MashupDbAdapter	db;
 	private URL						url			= null;
 	private SAXParser				sp			= null;
-	private final XMLReader			xr;
+	private XMLReader				xr;
 	private MashupXmlHandler		xmlHandler;
 	private static DatabaseHandler	instance	= null;
 	
-	public static DatabaseHandler getInstance(Context ctx) throws InvalidClassException {
+	public static DatabaseHandler getInstance(Context ctx) {
 		if (instance == null) {
 			instance = new DatabaseHandler(ctx);
 		}
@@ -42,7 +43,7 @@ public class DatabaseHandler {
 		return instance;
 	}
 	
-	private DatabaseHandler(Context ctx) throws InvalidClassException {
+	private DatabaseHandler(Context ctx) {
 		db = MashupDbAdapter.getInstance(ctx);
 		url = Config.MASHUP_DATA_URL;
 		/* Get a SAXParser from the SAXPArserFactory. */
@@ -50,15 +51,12 @@ public class DatabaseHandler {
 		try {
 			sp = spf.newSAXParser();
 			/* Get the XMLReader of the SAXParser we created. */
-			try {
-				xr = sp.getXMLReader();
-			}
-			catch (SAXException e) {
-				throw new InvalidClassException("The SAXParser could not return its XMLReader ");
-			}
+			xr = sp.getXMLReader();
+			
 		}
 		catch (Exception e) {
-			throw new InvalidClassException("The SAXParserFactory could not return an Instance of SAXParser ");
+			sp = null;
+			xr = null;
 		}
 	}
 	
@@ -72,19 +70,29 @@ public class DatabaseHandler {
 		ArrayList<MashupIntent> intents = getIntents();
 		if (intents.size() == 0) return 0;
 		db.open();
-		int installedAppsCount = 0;
+		
+		Cursor countCursor = db
+				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, MashupProvider.APPLICATION_INSTALLED + "=1", null, null, null, null, null);
+		int countBefore = countCursor.getCount();
+		
+		ContentValues values = new ContentValues();
+		values.put(MashupProvider.APPLICATION_INSTALLED, 0);
+		db.update(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, values, null, null);
+		
 		for ( MashupIntent mashupIntent : intents ) {
 			Intent queryIntent = new Intent();
 			queryIntent.setAction(mashupIntent.action);
 			
 			List<ResolveInfo> list = packageManager.queryIntentActivities(queryIntent, 0);
 			for ( ResolveInfo resolveInfo : list ) {
-				installedAppsCount += db.markAsInstalled(resolveInfo.activityInfo.packageName, resolveInfo
-						.loadLabel(packageManager).toString());
+				db.markAsInstalled(resolveInfo.activityInfo.packageName, resolveInfo.loadLabel(packageManager)
+						.toString(), resolveInfo.activityInfo.name);
 			}
 		}
+		countCursor.requery();
+		int countAfter = countCursor.getCount();
 		db.close();
-		return installedAppsCount;
+		return countAfter - countBefore;
 		
 	}
 	
@@ -127,13 +135,6 @@ public class DatabaseHandler {
 		xr.setContentHandler(xmlHandler);
 		xr.parse(new InputSource(url.openStream()));
 		return xmlHandler.insertCount;
-	}
-	
-	public void updateApplicationStatus() {
-		ArrayList<MashupApplication> applications = getApplications();
-		for ( MashupApplication mashupApplication : applications ) {
-			
-		}
 	}
 	
 	public int updateDataBase() throws Exception {

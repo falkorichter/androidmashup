@@ -6,25 +6,36 @@
 	android:layout_height="fill_parent"
 	android:isScrollContainer="true"
 	android:padding="5dip">
-
 	<Button
 		android:layout_height="wrap_content"
 		android:autoText="true"
-		android:id="@+id/UpdateButton"
+		android:id="@+id/Preferences_Update_Button"
 		android:layout_width="fill_parent"
-		android:text="update"></Button>
+		android:text="update database"></Button>
 	<Button
 		android:layout_height="wrap_content"
 		android:autoText="true"
-		android:id="@+id/LoadApps"
+		android:id="@+id/Preferences_findInstalledApps_Button"
 		android:layout_width="fill_parent"
-		android:text="load"></Button>
-
+		android:text="find installed Applications"></Button>
 	<Button
-		android:id="@+id/FindInstalledApps"
-		android:text="findInstalledApps"
-		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:autoText="true"></Button>
-	
+		android:autoText="true"
+		android:id="@+id/Preferences_clearDatabase_Button"
+		android:layout_width="fill_parent"
+		android:text="clear database"></Button>
+	<Button
+		android:layout_height="wrap_content"
+		android:autoText="true"
+		android:id="@+id/Preferences_about_Button"
+		android:layout_width="fill_parent"
+		android:text="about this app"></Button>
+	<ScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<TextView
+			android:layout_width="fill_parent"
+			android:id="@+id/PreferencesConsole"
+			android:layout_height="fill_parent" />
+	</ScrollView>
 </LinearLayout>

@@ -2,47 +2,54 @@ package com.androidMashup.Organizer.Ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.util.Linkify;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.androidMashup.Organizer.IMashupActivity;
+import com.androidMashup.Organizer.MyApplication;
 import com.androidMashup.Organizer.R;
 import com.androidMashup.Organizer.DataTypes.MashupIntent;
-import com.androidMashup.Organizer.Logic.MashupDbAdapter;
 import com.androidMashup.provider.MashupProvider;
 
 public class MashupTabApplications extends Activity implements OnClickListener, OnItemSelectedListener,
-		OnItemClickListener, android.content.DialogInterface.OnClickListener {
+		OnItemClickListener, android.content.DialogInterface.OnClickListener, OnItemLongClickListener, IMashupActivity {
+	
+	private class InstalledApplicationContextMenuListener implements OnCreateContextMenuListener {
+		public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+			menu.add(Menu.NONE, CONTEXT_MENU_DEINSTALL, 1, "deinstall");
+		}
+	}
 	
 	private ListView					installedApplicationsListView;
 	private ListView					availableApplicationsListView;
 	private Button						updateListButton;
-	private Cursor						installedApps;
-	private Cursor						availableApps;
-	private Spinner						intentchooser;
-	private MashupDbAdapter				db;
-	private ArrayList<MashupIntent>		availableIntents;
+	
+	// private Spinner intentchooser;
 	private String						applicationInformation;
 	private SimpleCursorAdapter			installedAppsAdapter;
 	private SimpleCursorAdapter			availableAppsAdapter;
@@ -52,31 +59,23 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	private String						applicationName;
 	private String						applicationApkUrl;
 	private Dialog						installChoiceDialog;
-	private Builder						alertBuilder;
-	private MashupIntent				selectedIntentId;
+	// private ArrayAdapter<MashupIntent> spinnerAdapter;
+	// private SimpleCursorAdapter spinnerAdapter2;
+	private MyApplication				myApp;
+	private String						applicationActivityClass;
+	private int							selectedPos;
+	
 	private static final MashupIntent	allIntentsDummy					= new MashupIntent("All Intents");
 	private static final int			DIALOG_APPLICATION_INFORMATION	= 0;
-	
-	private void getAvailableApps() {
-		// FIXME react to the selectedIntentId
-		String query = " " + MashupProvider.APPLICATION_INSTALLED + "='0' ";
-		query = "";
-		availableApps = db
-				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, query, null, null, null, null, null);
-	}
-	
-	private void getInstalledApps() {
-		String query = " " + MashupProvider.APPLICATION_INSTALLED + "='1' ";
-		query = "";
-		installedApps = db
-				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, query, null, null, null, null, null);
-	}
+	private static final int			INSTALL_DIALOG					= 1;
+	public static final int				CONTEXT_MENU_DEINSTALL			= 0;
 	
 	public void onClick(DialogInterface dialog, int which) {
+		dialog.dismiss();
 		if (dialog == installDialog && which == DialogInterface.BUTTON_POSITIVE && applicationPackage != null) {
 			if (applicationPackage.length() > 0) {
 				if (applicationApkUrl != null && applicationApkUrl.length() > 0) {
-					installChoiceDialog = alertBuilder
+					installChoiceDialog = new AlertDialog.Builder(this)
 							.setTitle("installation method")
 							// build.setIcon(R.drawable.alert_dialog_icon);
 							.setNegativeButton("market", this)
@@ -101,7 +100,7 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 		else if (dialog == showInfoDialog && which == DialogInterface.BUTTON_POSITIVE && applicationPackage != null) {
 			if (applicationPackage.length() > 0) {
 				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setComponent(new ComponentName(applicationPackage, applicationName));
+				i.setComponent(new ComponentName(applicationPackage, applicationActivityClass));
 				try {
 					startActivity(i);
 				}
@@ -129,7 +128,7 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 				Intent i = new Intent(Intent.ACTION_VIEW);
 				
 				try {
-					// using a URL in case to cath MalformedURLException
+					// using a URL in case to catch MalformedURLException
 					i.setData(Uri.parse(new URL(applicationApkUrl).toString()));
 					startActivity(i);
 				}
@@ -148,6 +147,12 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	}
 	
 	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.ApplicationsTab_updateList_Button:
+				myApp.findInstalledApps();
+				refreshDrawableStates();
+				break;
+		}
 	}
 	
 	@Override
@@ -155,42 +160,42 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.layout_organizer_tabs_applications);
 		
-		MashupDbAdapter dbAdapter = MashupDbAdapter.getInstance(getApplicationContext());
+		myApp = (MyApplication) getApplication();
+		myApp.registeredActivities.add(this);
+		myApp.updateDataBase();
 		
 		updateListButton = (Button) findViewById(R.id.ApplicationsTab_updateList_Button);
 		updateListButton.setOnClickListener(this);
 		
-		intentchooser = (Spinner) findViewById(R.id.ApplicationsTab_intentsSpinner);
-		availableIntents = dbAdapter.getAllIntents();
-		
-		availableIntents.add(0, allIntentsDummy);
-		ArrayAdapter<MashupIntent> spinnerAdapter = new ArrayAdapter<MashupIntent>(this, android.R.layout.simple_spinner_item, availableIntents);
-		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		intentchooser.setAdapter(spinnerAdapter);
-		intentchooser.setOnItemSelectedListener(this);
+		// String[] from3 = new String[] { MashupProvider.INTENT_TITLE };
+		// int[] to3 = { android.R.id.text1 };
+		// spinnerAdapter2 = new SimpleCursorAdapter(this,
+		// android.R.layout.simple_spinner_dropdown_item,
+		// myApp.enabledIntentsCursor, from3, to3);
+		//		
+		// intentchooser = (Spinner)
+		// findViewById(R.id.ApplicationsTab_intentsSpinner);
+		// intentchooser.setAdapter(spinnerAdapter2);
+		// intentchooser.setOnItemSelectedListener(this);
 		
 		installedApplicationsListView = (ListView) findViewById(R.id.ApplicationsTab_installedApplications_ListView);
 		
 		availableApplicationsListView = (ListView) findViewById(R.id.ApplicationsTab_newApplications_ListView);
 		
-		db = MashupDbAdapter.getInstance(getApplicationContext());
-		db.open();
-		
-		alertBuilder = new AlertDialog.Builder(this);
-		
-		getInstalledApps();
-		getAvailableApps();
+		InstalledApplicationContextMenuListener installedListener = new InstalledApplicationContextMenuListener();
 		
 		String[] from1 = new String[] { MashupProvider.APPLICATION_NAME };
 		int[] to1 = { R.id.installedApplication_Name };
-		installedAppsAdapter = new SimpleCursorAdapter(this, R.layout.installed_apps_view, installedApps, from1, to1);
+		installedAppsAdapter = new SimpleCursorAdapter(this, R.layout.installed_apps_view, myApp.installedAppsCursor, from1, to1);
 		installedApplicationsListView.setAdapter(installedAppsAdapter);
 		installedApplicationsListView.setSelector(R.drawable.selection_overlay);
 		installedApplicationsListView.setOnItemClickListener(this);
+		installedApplicationsListView.setOnCreateContextMenuListener(installedListener);
+		installedApplicationsListView.setOnItemLongClickListener(this);
 		
 		String[] from2 = new String[] { MashupProvider.APPLICATION_NAME };
 		int[] to2 = { R.id.availableApplication_Name };
-		availableAppsAdapter = new SimpleCursorAdapter(this, R.layout.available_apps_view, availableApps, from2, to2);
+		availableAppsAdapter = new SimpleCursorAdapter(this, R.layout.available_apps_view, myApp.availableAppsCursor, from2, to2);
 		availableApplicationsListView.setAdapter(availableAppsAdapter);
 		availableApplicationsListView.setSelector(R.drawable.selection_overlay);
 		availableApplicationsListView.setOnItemClickListener(this);
@@ -198,15 +203,17 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	
 	public void onItemClick(AdapterView<?> adapter, View v, int pos, long arg3) {
 		if (adapter == installedApplicationsListView) {
-			installedApps.moveToPosition(pos);
+			myApp.installedAppsCursor.moveToPosition(pos);
 			
-			String name = installedApps.getString(installedApps.getColumnIndex(MashupProvider.APPLICATION_NAME));
-			String description = installedApps.getString(installedApps
+			String name = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
+					.getColumnIndex(MashupProvider.APPLICATION_NAME));
+			String description = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DESCRIPTION));
-			String developerEmail = installedApps.getString(installedApps
+			String developerEmail = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DEVELOPER_EMAIL));
-			String url = installedApps.getString(installedApps.getColumnIndex(MashupProvider.APPLICATION_URL));
-			String developerUrl = installedApps.getString(installedApps
+			String url = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
+					.getColumnIndex(MashupProvider.APPLICATION_URL));
+			String developerUrl = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DEVELOPER_URL));
 			
 			applicationInformation = "";
@@ -223,29 +230,36 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 				applicationInformation += "Developers website: " + developerUrl + "\n";
 			}
 			
+			TextView descriptionView = new TextView(this);
+			descriptionView.setText(applicationInformation);
+			Linkify.addLinks(descriptionView, Linkify.ALL);
+			
 			// save the package for the intent
-			applicationPackage = installedApps.getString(installedApps
+			applicationPackage = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_PACKAGE));
 			applicationName = name;
+			applicationActivityClass = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
+					.getColumnIndex(MashupProvider.APPLICATION_ACTIVITY_CLASS));
 			
-			showInfoDialog = alertBuilder
+			showInfoDialog = new AlertDialog.Builder(this)
 					// build.setIcon(R.drawable.alert_dialog_icon);
 					.setNegativeButton("done", this).setTitle("Information about:" + name)
-					.setPositiveButton("open Application", this).setMessage(applicationInformation).setCancelable(true)
-					.create();
+					.setPositiveButton("open Application", this).setView(descriptionView).setCancelable(true).create();
 			showInfoDialog.show();
 		}
 		else if (adapter == availableApplicationsListView) {
 			
-			String name = availableApps.getString(installedApps.getColumnIndex(MashupProvider.APPLICATION_NAME));
-			String description = availableApps.getString(installedApps
+			String name = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
+					.getColumnIndex(MashupProvider.APPLICATION_NAME));
+			String description = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DESCRIPTION));
-			String developerEmail = availableApps.getString(installedApps
+			String developerEmail = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DEVELOPER_EMAIL));
-			String url = availableApps.getString(installedApps.getColumnIndex(MashupProvider.APPLICATION_URL));
-			String developerUrl = availableApps.getString(installedApps
+			String url = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
+					.getColumnIndex(MashupProvider.APPLICATION_URL));
+			String developerUrl = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_DEVELOPER_URL));
-			applicationApkUrl = availableApps.getString(installedApps
+			applicationApkUrl = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_APK_URL));
 			
 			applicationInformation = "";
@@ -266,28 +280,46 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 				applicationInformation += "Developers website: " + developerUrl + "\n";
 			}
 			// save the package for the intent
-			applicationPackage = availableApps.getString(installedApps
+			applicationPackage = myApp.availableAppsCursor.getString(myApp.installedAppsCursor
 					.getColumnIndex(MashupProvider.APPLICATION_PACKAGE));
 			
-			installDialog = alertBuilder
+			TextView descriptionView = new TextView(this);
+			descriptionView.setText(applicationInformation);
+			Linkify.addLinks(descriptionView, Linkify.ALL);
+			
+			installDialog = new AlertDialog.Builder(this)
 					// build.setIcon(R.drawable.alert_dialog_icon);
-					.setNegativeButton("done", this).setPositiveButton("install", this).setTitle("Information about:"
-																									+ name)
-					.setMessage(applicationInformation).setCancelable(true).create();
+					.setNegativeButton("done", this).setView(descriptionView).setPositiveButton("install", this)
+					.setTitle("Information about:" + name).setCancelable(true).create();
 			installDialog.show();
 		}
 	}
 	
-	public void onItemSelected(AdapterView<?> arg0, View v, int location, long arg3) {
-		if (v.getId() == R.id.ApplicationsTab_intentsSpinner) {
-			if (location > 0) {
-				selectedIntentId = availableIntents.get(location);
-				
-			}
-			else {
-				selectedIntentId = null;
-			}
+	public boolean onItemLongClick(AdapterView<?> adapter, View view, int pos, long arg3) {
+		if (adapter == installedApplicationsListView) {
+			selectedPos = pos;
 		}
+		return false;
+	}
+	
+	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		myApp.installedAppsCursor.moveToPosition(selectedPos);
+		switch (item.getItemId()) {
+			case CONTEXT_MENU_DEINSTALL:
+				String packageString = myApp.installedAppsCursor.getString(myApp.installedAppsCursor
+						.getColumnIndex(MashupProvider.APPLICATION_PACKAGE));
+				Uri packageURI = Uri.parse("package:" + packageString);
+				Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
+				startActivity(uninstallIntent);
+				
+				break;
+		}
+		return super.onMenuItemSelected(featureId, item);
 	}
 	
 	public void onNothingSelected(AdapterView<?> arg0) {
@@ -295,8 +327,30 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	}
 	
 	@Override
+	protected void onPause() {
+		super.onPause();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+	}
+	
+	@Override
 	protected void onStart() {
 		super.onStart();
-		db.open();
+	}
+	
+	private void refreshDrawableStates() {
+		// intentchooser.refreshDrawableState();
+		availableAppsAdapter.notifyDataSetChanged();
+		installedAppsAdapter.notifyDataSetChanged();
+		
+		installedApplicationsListView.refreshDrawableState();
+		availableApplicationsListView.refreshDrawableState();
+	}
+	
+	public void refreshState() {
+		refreshDrawableStates();
 	}
 }
