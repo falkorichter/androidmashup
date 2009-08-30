@@ -1,42 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:isScrollContainer="true">
-	
-	<TextView
+	android:layout_height="fill_parent">
+	<LinearLayout
+		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="installed mashups">
-	</TextView>
-	<ListView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/table_boarder"
-		android:id="@+id/IntentsTab_installedIntents_ListView">
-	</ListView>
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="availble mashups:">
-	</TextView>
-	<ListView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/table_boarder"
-		android:id="@+id/IntentsTab_newIntents_ListView">
-	</ListView>
-	<FrameLayout
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
+		android:layout_height="fill_parent">
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="installed mashups">
+		</TextView>
+		<ListView
+			android:layout_width="fill_parent"
+			android:layout_height="150dip"
+			android:background="@drawable/table_boarder"
+			android:id="@+id/IntentsTab_installedIntents_ListView">
+		</ListView>
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="available mashups:">
+		</TextView>
+		<ListView
+			android:layout_width="fill_parent"
+			android:layout_height="150dip"
+			android:background="@drawable/table_boarder"
+			android:id="@+id/IntentsTab_newIntents_ListView">
+		</ListView>
 		<Button
 			android:layout_height="wrap_content"
-			android:layout_width="150dip"
-			android:autoText="true"
-			android:layout_gravity="left"
+			android:layout_width="fill_parent"
 			android:id="@+id/IntentsTab_updateList_Button"
 			android:text="update List"></Button>
-	</FrameLayout>
-</LinearLayout>
+	</LinearLayout>
+</ScrollView>

@@ -1,42 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:isScrollContainer="true">
-	<Spinner
-		android:id="@+id/ApplicationsTab_intentsSpinner"
+	android:layout_height="fill_parent">
+	<LinearLayout
+		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:prompt="@string/ApplicationsTab_selectIntent_Spinner">
-	</Spinner>
-	<TextView	
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="installed applications:">
-	</TextView>
-	<ListView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/table_boarder"
-		android:id="@+id/ApplicationsTab_installedApplications_ListView">
-	</ListView>
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="add a new application:">
-	</TextView>
-	<ListView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/table_boarder"
-		android:id="@+id/ApplicationsTab_newApplications_ListView">
-	</ListView>
-	<Button
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:autoText="true"
-		android:id="@+id/ApplicationsTab_updateList_Button"
-		android:text="update List"></Button>
-</LinearLayout>
+		android:layout_height="fill_parent">
+<!-- 		android:isScrollContainer="true" -->
+		<!-- <Spinner
+			android:id="@+id/ApplicationsTab_intentsSpinner"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:prompt="@string/ApplicationsTab_selectIntent_Spinner">
+		</Spinner> -->
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="installed applications:">
+		</TextView>
+		<ListView
+			android:layout_width="fill_parent"
+			android:layout_height="150dip"
+			android:background="@drawable/table_boarder"
+			android:id="@+id/ApplicationsTab_installedApplications_ListView">
+		</ListView>
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="add a new application:">
+		</TextView>
+		<ListView
+			android:layout_width="fill_parent"
+			android:layout_height="150dip"
+			android:background="@drawable/table_boarder"
+			android:id="@+id/ApplicationsTab_newApplications_ListView">
+		</ListView>
+		<Button
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:id="@+id/ApplicationsTab_updateList_Button"
+			android:text="update List"></Button>
+	</LinearLayout>
+</ScrollView>

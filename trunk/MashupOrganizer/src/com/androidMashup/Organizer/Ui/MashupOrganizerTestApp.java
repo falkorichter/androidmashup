@@ -1,7 +1,6 @@
 package com.androidMashup.Organizer.Ui;
 
 import java.io.IOException;
-import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -236,14 +235,7 @@ public class MashupOrganizerTestApp extends Activity implements OnClickListener 
 		
 		intent_edit = (EditText) findViewById(R.id.Intent_EditText);
 		
-		try {
-			handler = DatabaseHandler.getInstance(this);
-		}
-		catch (InvalidClassException e) {
-			Toast
-					.makeText(getApplicationContext(), getText(R.string.toast_somethingWentTerriblyWrong), Toast.LENGTH_LONG);
-			finish();
-		}
+		handler = DatabaseHandler.getInstance(this);
 	}
 	
 	@Override

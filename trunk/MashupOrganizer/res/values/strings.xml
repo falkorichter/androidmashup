@@ -5,4 +5,23 @@
 <string name="toast_somethingWentTerriblyWrong">Something went terribly wrong, the apllication had to close. Try to open it again.</string>
 
 <string name="ApplicationsTab_selectIntent_Spinner">Select a mashup</string>
+<string name="preferences_about_application">
+Website: http://blog.androidmashup.org \n
+email: info@androidmashup.org \n
+\n
+\n
+This application and all the special mashup applications (Mashup Panoramio, Mashup Radar, Mashup FonMAPS, OpenFONMAps) are the result of a bachelor thesis at the University of Applied Sciences Berlin (http://www.htw-berlin.de) in the course International Media and Computing (http://imi.htw-berlin.de) by Falko Richter. The Sources of this applications are licenced by the Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0). The source can be found at http://code.google.com/p/androidmashup/. \n 
+\n
+Panoramio is orginally from http://code.google.com/p/apps-for-android/ \n
+Radar is orginally from http://code.google.com/p/apps-for-android/ \n
+\n
+FONMaps is owned by FON Wireless (http://www.fon.com)\n
+\n
+OpenFONMaps is based on the OpenStreetmap implementation by http://code.google.com/p/osmdroid/ \n
+\n
+if you have any questions write an email to info@androidmashup.org\n
+\n
+\n 
+   
+</string>
 </resources>
