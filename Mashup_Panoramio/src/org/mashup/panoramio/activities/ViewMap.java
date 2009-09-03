@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.android.panoramio.activities;
+package org.mashup.panoramio.activities;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mashup.panoramio.ImageManager;
+import org.mashup.panoramio.PanoramioItem;
+import org.mashup.panoramio.R;
 
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -36,10 +40,6 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
-import com.google.android.panoramio.ImageManager;
-import com.google.android.panoramio.PanoramioItem;
-import com.google.android.panoramio.R;
-import com.google.android.panoramio.R.drawable;
 
 /**
  * Displays a custom map which shows our current location and the location
@@ -62,7 +62,10 @@ public class ViewMap extends MapActivity {
 		}
 	}
 	
-	public static final String	MAPS_API_KEY	= "0Creua5zatJJ1G3uIKllvYG8w35i4QmjMa0AAeg";
+	// debug key public static final String MAPS_API_KEY =
+	// "0Creua5zatJJ1G3uIKllvYG8w35i4QmjMa0AAeg";
+	public static final String	MAPS_API_KEY	= "0Creua5zatJIalzgZXpjxhccnflRj4omtoKmwew";
+	
 	private PanoramioItem		mItem;
 	ArrayList<PanoramioItem>	mItems			= null;
 	private MapView				mMapView;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.panoramio;
+package org.mashup.panoramio;
 
 import android.content.Context;
 import android.database.DataSetObserver;
