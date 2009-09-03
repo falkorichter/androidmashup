@@ -3,8 +3,8 @@ package org.andnav.osm.views.overlay;
 
 import java.util.List;
 
-import org.andnav.osm.R;
 import org.andnav.osm.views.OpenStreetMapView;
+import org.mashup.OpenFONMaps.R;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,114 +14,83 @@ import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
-
-public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapViewOverlayItem> extends OpenStreetMapViewItemizedOverlay<T> {
+public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapViewOverlayItem> extends
+		OpenStreetMapViewItemizedOverlay<T> {
 	// ===========================================================
 	// Constants
 	// ===========================================================
 	
-	public static final int DESCRIPTION_BOX_PADDING = 3;
-	public static final int DESCRIPTION_BOX_CORNERWIDTH = 3;
+	protected static final int		DEFAULTMARKER_BACKGROUNDCOLOR		= Color.rgb(101, 185, 74);
+	protected static final Point	DEFAULTMARKER_FOCUSED_HOTSPOT		= new Point(10, 19);
 	
-	public static final int DESCRIPTION_LINE_HEIGHT = 12;
+	public static final int			DESCRIPTION_BOX_CORNERWIDTH			= 3;
+	public static final int			DESCRIPTION_BOX_PADDING				= 3;
+	
+	public static final int			DESCRIPTION_LINE_HEIGHT				= 12;
+	protected static final int		DESCRIPTION_MAXWIDTH				= 200;
+	
 	/** Additional to <code>DESCRIPTION_LINE_HEIGHT</code>. */
-	public static final int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
+	public static final int			DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT	= 2;
 	
-
-	protected static final Point DEFAULTMARKER_FOCUSED_HOTSPOT = new Point(10, 19);
-	protected static final int DEFAULTMARKER_BACKGROUNDCOLOR = Color.rgb(101, 185, 74);
-	
-	protected static final int DESCRIPTION_MAXWIDTH = 200;
-
 	// ===========================================================
 	// Fields
 	// ===========================================================
 	
-	protected final Point mMarkerFocusedHotSpot; 
-	protected final Drawable mMarkerFocusedBase;
-	protected final int mMarkerFocusedBackgroundColor;
-	protected final int mMarkerFocusedWidth, mMarkerFocusedHeight; 
-	protected final Paint mMarkerBackgroundPaint, mDescriptionPaint, mTitlePaint;
+	protected int					mFocusedItemIndex;
+	private final Point				mFocusedScreenCoords				= new Point();
+	protected boolean				mFocusItemsOnTap;
+	protected final Paint			mMarkerBackgroundPaint, mDescriptionPaint, mTitlePaint;
+	protected final int				mMarkerFocusedBackgroundColor;
 	
-	protected int mFocusedItemIndex;
-	protected boolean mFocusItemsOnTap;
-	private Point mFocusedScreenCoords = new Point();
+	protected final Drawable		mMarkerFocusedBase;
+	protected final Point			mMarkerFocusedHotSpot;
+	protected final int				mMarkerFocusedWidth, mMarkerFocusedHeight;
 	
-	private final String UNKNOWN;
-
+	private final String			UNKNOWN;
+	
 	// ===========================================================
 	// Constructors
 	// ===========================================================
-	
-	public OpenStreetMapViewItemizedOverlayWithFocus(final Context ctx, final List<T> aList, final OnItemTapListener<T> aOnItemTapListener) {
-		this(ctx, aList, null, null, null, null, NOT_SET, aOnItemTapListener);
-	}
 	
 	public OpenStreetMapViewItemizedOverlayWithFocus(final Context ctx, final List<T> aList, final Drawable pMarker, final Point pMarkerHotspot, final Drawable pMarkerFocusedBase, final Point pMarkerFocusedHotSpot, final int pFocusedBackgroundColor, final OnItemTapListener<T> aOnItemTapListener) {
 		super(ctx, aList, pMarkerFocusedBase, pMarkerHotspot, aOnItemTapListener);
 		
 		UNKNOWN = ctx.getString(R.string.unknown);
 		
-		this.mMarkerFocusedBase = (pMarkerFocusedBase != null) ? pMarkerFocusedBase : ctx.getResources().getDrawable(R.drawable.marker_default_focused_base);
+		this.mMarkerFocusedBase = (pMarkerFocusedBase != null) ? pMarkerFocusedBase : ctx.getResources()
+				.getDrawable(R.drawable.marker_default_focused_base);
 		
 		this.mMarkerFocusedHotSpot = (pMarkerFocusedHotSpot != null) ? pMarkerFocusedHotSpot : DEFAULTMARKER_FOCUSED_HOTSPOT;
 		
-		if(pFocusedBackgroundColor != NOT_SET)
+		if (pFocusedBackgroundColor != NOT_SET)
 			this.mMarkerFocusedBackgroundColor = pFocusedBackgroundColor;
 		else
 			this.mMarkerFocusedBackgroundColor = DEFAULTMARKER_BACKGROUNDCOLOR;
 		
-		this.mMarkerBackgroundPaint = new Paint(); // Color is set in onDraw(...)
+		this.mMarkerBackgroundPaint = new Paint(); // Color is set in
+													// onDraw(...)
 		
 		this.mDescriptionPaint = new Paint();
 		this.mDescriptionPaint.setAntiAlias(true);
 		this.mTitlePaint = new Paint();
 		this.mTitlePaint.setFakeBoldText(true);
 		this.mTitlePaint.setAntiAlias(true);
-
+		
 		this.mMarkerFocusedWidth = this.mMarkerFocusedBase.getIntrinsicWidth();
 		this.mMarkerFocusedHeight = this.mMarkerFocusedBase.getIntrinsicHeight();
 	}
-
+	
+	public OpenStreetMapViewItemizedOverlayWithFocus(final Context ctx, final List<T> aList, final OnItemTapListener<T> aOnItemTapListener) {
+		this(ctx, aList, null, null, null, null, NOT_SET, aOnItemTapListener);
+	}
+	
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
 	
-	public void setFocusedItem(final int pIndex){
-		this.mFocusedItemIndex = pIndex;
-	}
-	
-	public void unSetFocusedItem(){
-		this.mFocusedItemIndex = NOT_SET;
-	}
-	
-	public void setFocusedItem(final T pItem){
-		final int indexFound = super.mItemList.indexOf(pItem);
-		if(indexFound < 0)
-			throw new IllegalArgumentException();
-		
-		this.setFocusedItem(indexFound);
-	}
-	
-	public void setFocusItemsOnTap(final boolean doit) {
-		this.mFocusItemsOnTap = doit;
-	}
-
-	// ===========================================================
-	// Methods from SuperClass/Interfaces
-	// ===========================================================
-	
-	@Override
-	protected boolean onTap(int pIndex) {
-		if(this.mFocusItemsOnTap)
-			this.mFocusedItemIndex = pIndex;
-			
-		return super.onTap(pIndex);
-	}
-	
 	@Override
 	protected void onDrawFinished(Canvas c, OpenStreetMapView osmv) {
-		if(this.mFocusedItemIndex != NOT_SET){
+		if (this.mFocusedItemIndex != NOT_SET) {
 			/* Calculate and set the bounds of the marker. */
 			final int left = this.mFocusedScreenCoords.x - this.mMarkerFocusedHotSpot.x;
 			final int right = left + this.mMarkerFocusedWidth;
@@ -134,7 +103,10 @@ public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapVi
 			final String itemTitle = (focusedItem.mTitle == null) ? UNKNOWN : focusedItem.mTitle;
 			final String itemDescription = (focusedItem.mDescription == null) ? UNKNOWN : focusedItem.mDescription;
 			
-			/* Store the width needed for each char in the description to a float array. This is pretty efficient. */
+			/*
+			 * Store the width needed for each char in the description to a
+			 * float array. This is pretty efficient.
+			 */
 			final float[] widths = new float[itemDescription.length()];
 			this.mDescriptionPaint.getTextWidths(itemDescription, widths);
 			
@@ -144,20 +116,20 @@ public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapVi
 			int lastStop = 0;
 			int i;
 			int lastwhitespace = 0;
-			/* Loop through the charwidth array and harshly insert a linebreak, 
-			 * when the width gets bigger than DESCRIPTION_MAXWIDTH. */
-			for (i = 0; i < widths.length; i++) {
-				if(!Character.isLetter(itemDescription.charAt(i)))
-					lastwhitespace = i;
+			/*
+			 * Loop through the charwidth array and harshly insert a linebreak,
+			 * when the width gets bigger than DESCRIPTION_MAXWIDTH.
+			 */
+			for ( i = 0 ; i < widths.length ; i++ ) {
+				if (!Character.isLetter(itemDescription.charAt(i))) lastwhitespace = i;
 				
 				float charwidth = widths[i];
-				       
-				if(curLineWidth + charwidth> DESCRIPTION_MAXWIDTH){
-					if(lastStop == lastwhitespace)
+				
+				if (curLineWidth + charwidth > DESCRIPTION_MAXWIDTH) {
+					if (lastStop == lastwhitespace)
 						i--;
 					else
 						i = lastwhitespace;
-					
 					
 					sb.append(itemDescription.subSequence(lastStop, i));
 					sb.append('\n');
@@ -170,45 +142,51 @@ public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapVi
 				curLineWidth += charwidth;
 			}
 			/* Add the last line to the rest to the buffer. */
-			if(i != lastStop){
+			if (i != lastStop) {
 				final String rest = itemDescription.substring(lastStop, i);
 				
-				maxWidth = Math.max(maxWidth, (int)this.mDescriptionPaint.measureText(rest));
-
+				maxWidth = Math.max(maxWidth, (int) this.mDescriptionPaint.measureText(rest));
+				
 				sb.append(rest);
 			}
 			final String[] lines = sb.toString().split("\n");
 			
-			/* The title also needs to be taken into consideration for the width calculation. */
-			final int titleWidth = (int)this.mDescriptionPaint.measureText(itemTitle);
+			/*
+			 * The title also needs to be taken into consideration for the width
+			 * calculation.
+			 */
+			final int titleWidth = (int) this.mDescriptionPaint.measureText(itemTitle);
 			
 			maxWidth = Math.max(maxWidth, titleWidth);
 			final int descWidth = Math.min(maxWidth, DESCRIPTION_MAXWIDTH);
 			
-			/* Calculate the bounds of the Description box that needs to be drawn. */
+			/*
+			 * Calculate the bounds of the Description box that needs to be
+			 * drawn.
+			 */
 			final int descBoxLeft = left - descWidth / 2 - DESCRIPTION_BOX_PADDING + this.mMarkerFocusedWidth / 2;
 			final int descBoxRight = descBoxLeft + descWidth + 2 * DESCRIPTION_BOX_PADDING;
 			final int descBoxBottom = top;
-			final int descBoxTop = descBoxBottom 
-						- DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT 
-						- (lines.length + 1) * DESCRIPTION_LINE_HEIGHT /* +1 because of the title. */ 
-						- 2 * DESCRIPTION_BOX_PADDING;
+			final int descBoxTop = descBoxBottom - DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT - (lines.length + 1)
+									* DESCRIPTION_LINE_HEIGHT /*
+															 * +1 because of the
+															 * title.
+															 */
+									- 2 * DESCRIPTION_BOX_PADDING;
 			
 			/* Twice draw a RoundRect, once in black with 1px as a small border. */
 			this.mMarkerBackgroundPaint.setColor(Color.BLACK);
-			c.drawRoundRect(new RectF(descBoxLeft - 1, descBoxTop - 1, descBoxRight + 1, descBoxBottom + 1),
-						DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
-						this.mDescriptionPaint);
+			c
+					.drawRoundRect(new RectF(descBoxLeft - 1, descBoxTop - 1, descBoxRight + 1, descBoxBottom + 1), DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH, this.mDescriptionPaint);
 			this.mMarkerBackgroundPaint.setColor(this.mMarkerFocusedBackgroundColor);
-			c.drawRoundRect(new RectF(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom),
-						DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH, 
-						this.mMarkerBackgroundPaint);
+			c
+					.drawRoundRect(new RectF(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom), DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH, this.mMarkerBackgroundPaint);
 			
 			final int descLeft = descBoxLeft + DESCRIPTION_BOX_PADDING;
 			int descTextLineBottom = descBoxBottom - DESCRIPTION_BOX_PADDING;
 			
 			/* Draw all the lines of the description. */
-			for(int j = lines.length - 1; j >= 0; j--){
+			for ( int j = lines.length - 1 ; j >= 0 ; j-- ) {
 				c.drawText(lines[j].trim(), descLeft, descTextLineBottom, this.mDescriptionPaint);
 				descTextLineBottom -= DESCRIPTION_LINE_HEIGHT;
 			}
@@ -216,26 +194,63 @@ public class OpenStreetMapViewItemizedOverlayWithFocus<T extends OpenStreetMapVi
 			c.drawText(itemTitle, descLeft, descTextLineBottom - DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT, this.mTitlePaint);
 			c.drawLine(descBoxLeft, descTextLineBottom, descBoxRight, descTextLineBottom, mDescriptionPaint);
 			
-			/* Finally draw the marker base. This is done in the end to make it look better. */
+			/*
+			 * Finally draw the marker base. This is done in the end to make it
+			 * look better.
+			 */
 			this.mMarkerFocusedBase.draw(c);
 		}
 	}
 	
 	@Override
 	protected void onDrawItem(final Canvas c, final int index, final Point screenCoords) {
-		if(this.mFocusedItemIndex != NOT_SET && index == this.mFocusedItemIndex){
+		if (this.mFocusedItemIndex != NOT_SET && index == this.mFocusedItemIndex) {
 			/* Actual draw will take place in onDrawFinished. */
-			/* Because we are reusing the screencoords apssed here, we cannot simply store the reference. */
+			/*
+			 * Because we are reusing the screencoords apssed here, we cannot
+			 * simply store the reference.
+			 */
 			this.mFocusedScreenCoords.set(screenCoords.x, screenCoords.y);
-		}else{
+		}
+		else {
 			super.onDrawItem(c, index, screenCoords);
 		}
 	}
-
+	
+	@Override
+	protected boolean onTap(int pIndex) {
+		if (this.mFocusItemsOnTap) this.mFocusedItemIndex = pIndex;
+		
+		return super.onTap(pIndex);
+	}
+	
+	public void setFocusedItem(final int pIndex) {
+		this.mFocusedItemIndex = pIndex;
+	}
+	
+	// ===========================================================
+	// Methods from SuperClass/Interfaces
+	// ===========================================================
+	
+	public void setFocusedItem(final T pItem) {
+		final int indexFound = super.mItemList.indexOf(pItem);
+		if (indexFound < 0) throw new IllegalArgumentException();
+		
+		this.setFocusedItem(indexFound);
+	}
+	
+	public void setFocusItemsOnTap(final boolean doit) {
+		this.mFocusItemsOnTap = doit;
+	}
+	
+	public void unSetFocusedItem() {
+		this.mFocusedItemIndex = NOT_SET;
+	}
+	
 	// ===========================================================
 	// Methods
 	// ===========================================================
-
+	
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================

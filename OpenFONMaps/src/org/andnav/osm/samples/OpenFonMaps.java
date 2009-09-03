@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.andnav.osm.R;
 import org.andnav.osm.util.GeoPoint;
 import org.andnav.osm.views.OpenStreetMapView;
 import org.andnav.osm.views.controller.OpenStreetMapViewController;
@@ -21,6 +20,7 @@ import org.andnav.osm.views.overlay.OpenStreetMapViewItemizedOverlay.OnItemTapLi
 import org.andnav.osm.views.util.OpenStreetMapRendererInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.mashup.OpenFONMaps.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,10 +29,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Handler.Callback;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -52,21 +56,43 @@ import android.widget.RelativeLayout.LayoutParams;
  * @author Nicolas Gramlich
  * @author Falko Richter
  */
-public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStreetMapViewOverlayItem>, OnClickListener {
+public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStreetMapViewOverlayItem>, OnClickListener,
+		Callback {
 	
-	private static final String												API_URL			= "http://maps.fon.com/ajax/getNodes";
-	private static final String												FONSPOT_FILE	= "fonspots.spots";
-	private static final int												MENU_MASHUP		= Menu.FIRST;
-	private static final double												MILLION			= 1000000;
+	private static final String												API_URL				= "http://maps.fon.com/ajax/getNodes";
+	private static final String												FONSPOT_FILE		= "fonspots.spots";
+	private static final int												MENU_MASHUP			= Menu.FIRST;
+	private static final double												MILLION				= 1000000;
+	private static final String												PREF_FIRST_STARTUP	= "FIRST_STARTUP";
+	private static final String												PREFERENCES			= "PREFERENCES";
 	
+	private final Runnable													beforeRequestRunner	= new Runnable() {
+																									public void run() {
+																										beforeRequest();
+																									}
+																									
+																								};
 	private OpenStreetMapViewController										controller;
 	private JSONException													exception;
 	private Button															goButton;
-	private Button															mashupButton;
 	
+	private Button															mashupButton;
+	private OpenStreetMapView												mMapView;
 	private OpenStreetMapViewItemizedOverlay<OpenStreetMapViewOverlayItem>	mMyLocationOverlay;
-	private OpenStreetMapView												mOsmv, mOsmvMinimap;
+	
+	private final Runnable													refreshRunner		= new Runnable() {
+																									public void run() {
+																										refreshView();
+																									};
+																								};
+	private Thread															runner;
 	private HashMap<Integer, double[]>										spots;
+	
+	private Handler															threadHandler;
+	
+	protected void beforeRequest() {
+		getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS, Window.PROGRESS_VISIBILITY_ON);
+	}
 	
 	private void displayFonSpots(OpenStreetMapView mOsmv2) {
 		if (spots != null) {
@@ -78,11 +104,9 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 				mMyLocationOverlay.addItem(add);
 			}
 		}
-		mOsmv2.refreshDrawableState();
 	}
 	
-	private void findFonSpots(OpenStreetMapView mOsmv2) {
-		getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS, Window.PROGRESS_VISIBILITY_ON);
+	private void findFonSpots(final OpenStreetMapView mOsmv2) {
 		int oldSpotSize = spots.size();
 		
 		double latitudeSpan = mOsmv2.getLatitudeSpanE6();
@@ -175,57 +199,101 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 			
 		}
 		Log.i("fonMaps", "no Spots", null);
-		getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS, Window.PROGRESS_VISIBILITY_OFF);
-		return;
+	}
+	
+	public boolean handleMessage(Message msg) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	private void mashup(String intentIdentifier, String dialogTitle) {
+		PackageManager mPackageManager = getPackageManager();
+		Intent queryIntent = new Intent(intentIdentifier);
+		List<ResolveInfo> mashupList = mPackageManager.queryIntentActivities(queryIntent, 0);
+		ArrayList<String> apps = new ArrayList<String>();
+		for ( int i = 0 ; i < mashupList.size() ; i++ ) {
+			ResolveInfo item = mashupList.get(i);
+			if (!item.activityInfo.packageName.equals(getApplication().getPackageName())) {
+				apps.add(item.loadLabel(mPackageManager).toString());
+			}
+			else {
+				mashupList.remove(i);
+				i--;
+			}
+		}
+		final List<ResolveInfo> finalList = mashupList;
+		
+		String[] items = apps.toArray(new String[apps.size()]);
+		if (finalList.size() == 0) {
+			try {
+				Intent i = new Intent("org.mashupOrganizer.SHOW_ORGANIZER");
+				i.putExtra("mashup", intentIdentifier);
+				startActivity(i);
+				Toast.makeText(this, "no apps installed, starting the Organizer", Toast.LENGTH_LONG).show();
+			}
+			catch (Exception e) {
+				try {
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse("market://search?q=mashup"));
+					startActivity(i);
+					Toast.makeText(this, "let´s search in the market for mashup apps", Toast.LENGTH_LONG).show();
+				}
+				catch (Exception ex) {
+					Toast
+							.makeText(this, "no other app installed and you don´t have a market installed", Toast.LENGTH_LONG)
+							.show();
+				}
+			}
+			
+		}
+		else {
+			AlertDialog alert = new AlertDialog.Builder(this).setTitle(dialogTitle)
+					.setItems(items, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							ResolveInfo clickedApp = finalList.get(which);
+							Intent intent = new Intent();
+							intent
+									.setComponent(new ComponentName(clickedApp.activityInfo.applicationInfo.packageName, clickedApp.activityInfo.name));
+							intent.putExtra("latitude", mMapView.getMapCenterLatitudeE6());
+							intent.putExtra("longitude", mMapView.getMapCenterLongitudeE6());
+							intent.putExtra("zoomLevel", mMapView.getZoomLevel());
+							startActivity(intent);
+						}
+					}).setIcon(R.drawable.diagona069).create();
+			alert.show();
+		}
 	}
 	
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.ZoomIn:
-				mOsmv.zoomIn();
+				mMapView.zoomIn();
 				break;
 			case R.id.ZoomOut:
-				mOsmv.zoomOut();
+				mMapView.zoomOut();
 				break;
 			case R.id.go:
 				Log.i("fonMaps", "button klicked", null);
-				findFonSpots(mOsmv);
-				displayFonSpots(mOsmv);
-				mOsmv.invalidate();
+				runner = new Thread() {
+					@Override
+					public void run() {
+						try {
+							threadHandler.post(beforeRequestRunner);
+							findFonSpots(mMapView);
+							displayFonSpots(mMapView);
+						}
+						catch (Exception e) {
+						}
+						finally {
+							threadHandler.post(refreshRunner);
+							
+						}
+					}
+				};
+				runner.start();
 				break;
 			case R.id.mashupButton:
-				PackageManager mPackageManager = getPackageManager();
-				Intent queryIntent = new Intent("com.androidMashup.MAP_VIEW");
-				List<ResolveInfo> mashupList = mPackageManager.queryIntentActivities(queryIntent, 0);
-				ArrayList<String> apps = new ArrayList<String>();
-				for ( int i = 0 ; i < mashupList.size() ; i++ ) {
-					ResolveInfo item1 = mashupList.get(i);
-					if (!item1.activityInfo.packageName.equals(getApplication().getPackageName())) {
-						apps.add(item1.loadLabel(mPackageManager).toString());
-					}
-					else {
-						mashupList.remove(i);
-						i--;
-					}
-				}
-				final List<ResolveInfo> finalList = mashupList;
-				
-				String[] items = apps.toArray(new String[apps.size()]);
-				
-				AlertDialog alert = new AlertDialog.Builder(this).setTitle("Mashup with this coordinate!")
-						.setItems(items, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								ResolveInfo clickedApp = finalList.get(which);
-								Intent intent = new Intent();
-								intent
-										.setComponent(new ComponentName(clickedApp.activityInfo.applicationInfo.packageName, clickedApp.activityInfo.name));
-								intent.putExtra("latitude", mOsmv.getMapCenterLatitudeE6());
-								intent.putExtra("longitude", mOsmv.getMapCenterLongitudeE6());
-								intent.putExtra("zoomLevel", mOsmv.getZoomLevel());
-								startActivity(intent);
-							}
-						}).setIcon(R.drawable.diagona069).create();
-				alert.show();
+				mashup("com.androidMashup.MAP_VIEW", "Mashup! this map");
 		}
 	}
 	
@@ -236,18 +304,22 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		
+		threadHandler = new Handler(this);
 		
 		setContentView(R.layout.main);
+		
 		FrameLayout frame = (FrameLayout) findViewById(R.id.frame);
 		
-		mOsmv = new OpenStreetMapView(this, OpenStreetMapRendererInfo.MAPNIK);
-		frame.addView(mOsmv, new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		mMapView = new OpenStreetMapView(this, OpenStreetMapRendererInfo.MAPNIK);
+		frame.addView(mMapView, new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		
 		final ImageView ivZoomIn = (ImageView) findViewById(R.id.ZoomIn);
 		ivZoomIn.setOnClickListener(this);
 		
 		final ImageView ivZoomOut = (ImageView) findViewById(R.id.ZoomOut);
-		ivZoomIn.setOnClickListener(this);
+		ivZoomOut.setOnClickListener(this);
 		
 		goButton = (Button) findViewById(R.id.go);
 		goButton.setOnClickListener(this);
@@ -255,7 +327,7 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		mashupButton = (Button) findViewById(R.id.mashupButton);
 		mashupButton.setOnClickListener(this);
 		
-		controller = mOsmv.getController();
+		controller = mMapView.getController();
 		
 		try {
 			ObjectInputStream ois = new ObjectInputStream(getApplicationContext().openFileInput(FONSPOT_FILE));
@@ -266,6 +338,13 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		}
 		catch (Exception e) {
 			spots = new HashMap<Integer, double[]>();
+		}
+		
+		SharedPreferences settings = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+		boolean firstStartup = settings.getBoolean(PREF_FIRST_STARTUP, true);
+		
+		if (firstStartup) {
+			showInfo();
 		}
 		
 		onNewIntent(getIntent());
@@ -279,7 +358,7 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 			this.mMyLocationOverlay = new OpenStreetMapViewItemizedOverlay<OpenStreetMapViewOverlayItem>(this, items, getResources()
 					.getDrawable(R.drawable.fonspot_active), null, this);
 			
-			mOsmv.getOverlays().add(this.mMyLocationOverlay);
+			mMapView.getOverlays().add(this.mMyLocationOverlay);
 		}
 		
 	}
@@ -304,6 +383,7 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		sub.add(2, 6, 2, R.string.zoomOut);
 		
 		menu.add(0, 8, 2, R.string.deleteDatabase);
+		menu.add(0, 9, 2, R.string.info);
 		
 		return true;
 	}
@@ -330,27 +410,15 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		switch (keyCode) {
 			case KeyEvent.KEYCODE_VOLUME_UP:
 			case KeyEvent.KEYCODE_I:
-				mOsmv.zoomIn();
+				mMapView.zoomIn();
 				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
 			case KeyEvent.KEYCODE_O:
-				mOsmv.zoomOut();
+				mMapView.zoomOut();
 				return true;
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	// ===========================================================
-	// Methods
-	// ===========================================================
-	
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-	
-	// ===========================================================
-	// Methods from SuperClass/Interfaces
-	// ===========================================================
 	
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -360,28 +428,28 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		GeoPoint location;
 		switch (item.getItemId()) {
 			case 30:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.OSMARENDER);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.OSMARENDER);
 				return true;
 			case 31:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.MAPNIK);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.MAPNIK);
 				return true;
 			case 32:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.CYCLEMAP);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.CYCLEMAP);
 				return true;
 			case 33:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.OPENARIELMAP);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.OPENARIELMAP);
 				return true;
 			case 34:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESMALLTILES);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESMALLTILES);
 				return true;
 			case 35:
-				mOsmv.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESTANDARDTILES);
+				mMapView.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESTANDARDTILES);
 				return true;
 			case 5:
-				mOsmv.zoomIn();
+				mMapView.zoomIn();
 				return true;
 			case 6:
-				mOsmv.zoomOut();
+				mMapView.zoomOut();
 				return true;
 			case 7:
 				i = new Intent(Intent.ACTION_VIEW);
@@ -392,7 +460,10 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 			case 8:
 				spots.clear();
 				mMyLocationOverlay.clearItems();
-				mOsmv.invalidate();
+				mMapView.invalidate();
+				return true;
+			case 9:
+				showInfo();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -405,34 +476,34 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		
 		int latE6 = recieve.getIntExtra("latitude", -1);
 		int lonE6 = recieve.getIntExtra("longitude", -1);
-		mOsmv.setZoomLevel(recieve.getIntExtra("zoomLevel", 15));
+		mMapView.setZoomLevel(recieve.getIntExtra("zoomLevel", 15));
 		
 		String mapMode = recieve.getStringExtra("mapMode");
 		mapMode = mapMode == null ? "traffic" : mapMode;
 		if (mapMode.equals("traffic") || mapMode.equals("MAPNIK")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.MAPNIK);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.MAPNIK);
 		}
 		else if (mapMode.equals("OSMARENDER")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.OSMARENDER);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.OSMARENDER);
 		}
 		else if (mapMode.equals("CYCLEMAP")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.CYCLEMAP);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.CYCLEMAP);
 		}
 		else if (mapMode.equals("OPENARIELMAP") || mapMode.equals("satelite")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.OPENARIELMAP);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.OPENARIELMAP);
 		}
 		else if (mapMode.equals("CLOUDMADESMALLTILES")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESMALLTILES);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESMALLTILES);
 		}
 		else if (mapMode.equals("CLOUDMADESTANDARDTILES")) {
-			mOsmv.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESTANDARDTILES);
+			mMapView.setRenderer(OpenStreetMapRendererInfo.CLOUDMADESTANDARDTILES);
 		}
 		
 		if ((latE6 == -1) || (lonE6 == -1)) {
-			mOsmv.setMapCenter(40417188, -3699302);
+			mMapView.setMapCenter(40417188, -3699302);
 		}
 		else {
-			mOsmv.setMapCenter(latE6, lonE6);
+			mMapView.setMapCenter(latE6, lonE6);
 		}
 	}
 	
@@ -448,7 +519,24 @@ public class OpenFonMaps extends Activity implements OnItemTapListener<OpenStree
 		super.onPause();
 	}
 	
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
+	protected void refreshView() {
+		mMapView.invalidate();
+		getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS, Window.PROGRESS_VISIBILITY_OFF);
+	}
+	
+	private void showInfo() {
+		
+		AlertDialog installDialog = new AlertDialog.Builder(this)
+				.setNegativeButton("done", new android.content.DialogInterface.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						SharedPreferences settings = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+						SharedPreferences.Editor editor = settings.edit();
+						editor.putBoolean(PREF_FIRST_STARTUP, false);
+						editor.commit();
+					}
+				}).setMessage(R.string.infoText).setTitle("Help").setCancelable(true).create();
+		installDialog.show();
+		
+	}
 }

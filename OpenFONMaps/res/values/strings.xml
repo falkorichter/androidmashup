@@ -16,6 +16,19 @@
 <string name="CLOUDMADESMALLTILES">CLOUDMADESMALLTILES</string>
 <string name="CLOUDMADESTANDARDTILES">CLOUDMADESTANDARDTILES</string>
 
+<string name="info">help</string>
+
+
+<string name="infoText">Welcome to OpenFONMaps\n
+this app is still in development, if you have any comments write an email to info@androidmashup.org\n
+If you want to use the mashup! feature, you need to have at least another app installed with this feature. At the moment:\n
+- 'FONMaps'\n
+- 'Mashup-Panoramio'\n
+support the feature. Check out the 'Mashup-Organizer' for other apps to come.
+'Mashup-Radar' or the regular 'Radar' work great when you want to navigate to a fonspot after clicking on it\n
+\n
+And finally a quick tip: Zooming also works with the volume buttons!</string>
+
 <string name="zoomIn">Zoom in</string>
 <string name="zoomOut">Zoom Out</string>
 <string name="deleteDatabase">clear Database</string>
