@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.panoramio;
+package org.mashup.panoramio;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

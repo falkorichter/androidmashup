@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.panoramio;
+package org.mashup.panoramio;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,8 +32,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mashup.panoramio.activities.Panoramio;
 
-import com.google.android.panoramio.activities.Panoramio;
 
 import android.content.Context;
 import android.database.DataSetObserver;
