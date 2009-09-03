@@ -3,9 +3,9 @@ package org.andnav.osm.views.overlay;
 
 import java.util.List;
 
-import org.andnav.osm.R;
 import org.andnav.osm.views.OpenStreetMapView;
 import org.andnav.osm.views.OpenStreetMapView.OpenStreetMapViewProjection;
+import org.mashup.OpenFONMaps.R;
 
 import android.content.Context;
 import android.graphics.Canvas;

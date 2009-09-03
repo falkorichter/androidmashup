@@ -1,7 +1,7 @@
 // Created by plusminus on 22:59:38 - 12.09.2008
 package org.andnav.osm.views.overlay;
 
-import org.andnav.osm.R;
+import org.mashup.OpenFONMaps.R;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -9,24 +9,39 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-public class OpenStreetMapViewItemizedOverlayControlView extends LinearLayout{
+public class OpenStreetMapViewItemizedOverlayControlView extends LinearLayout {
 	// ===========================================================
 	// Constants
 	// ===========================================================
-
+	
 	// ===========================================================
 	// Fields
 	// ===========================================================
 	
-	protected ImageButton mPreviousButton;
-	protected ImageButton mNextButton;
-	protected ImageButton mCenterToButton;
-	protected ImageButton mNavToButton;
-
-	protected ItemizedOverlayControlViewListener mLis;
-
+	public interface ItemizedOverlayControlViewListener {
+		public void onCenter();
+		
+		public void onNavTo();
+		
+		public void onNext();
+		
+		public void onPrevious();
+	}
+	
+	protected ImageButton							mCenterToButton;
+	protected ItemizedOverlayControlViewListener	mLis;
+	protected ImageButton							mNavToButton;
+	
+	protected ImageButton							mNextButton;
+	
 	// ===========================================================
 	// Constructors
+	// ===========================================================
+	
+	protected ImageButton							mPreviousButton;
+	
+	// ===========================================================
+	// Getter & Setter
 	// ===========================================================
 	
 	public OpenStreetMapViewItemizedOverlayControlView(Context context, AttributeSet attrs) {
@@ -51,77 +66,66 @@ public class OpenStreetMapViewItemizedOverlayControlView extends LinearLayout{
 		
 		initViewListeners();
 	}
-
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
+	
+	private void initViewListeners() {
+		this.mNextButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				if (OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
+					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onNext();
+			}
+		});
+		
+		this.mPreviousButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				if (OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
+					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onPrevious();
+			}
+		});
+		
+		this.mCenterToButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				if (OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
+					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onCenter();
+			}
+		});
+		
+		this.mNavToButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				if (OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
+					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onNavTo();
+			}
+		});
+	}
 	
 	public void setItemizedOverlayControlViewListener(final ItemizedOverlayControlViewListener lis) {
 		this.mLis = lis;
 	}
 	
-	public void setNextEnabled(final boolean pEnabled){
-		this.mNextButton.setEnabled(pEnabled);
-	}
-	
-	public void setPreviousEnabled(final boolean pEnabled){
-		this.mPreviousButton.setEnabled(pEnabled);
-	}
-	
-	public void setNavToVisible(final int pVisibility){
+	public void setNavToVisible(final int pVisibility) {
 		this.mNavToButton.setVisibility(pVisibility);
 	}
-
+	
 	// ===========================================================
 	// Methods from SuperClass/Interfaces
 	// ===========================================================
-
+	
 	// ===========================================================
 	// Methods
 	// ===========================================================
 	
-	private void initViewListeners(){
-		this.mNextButton.setOnClickListener(new OnClickListener(){
-			
-			public void onClick(View v) {
-				if(OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
-					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onNext();
-			}
-		});
-		
-		this.mPreviousButton.setOnClickListener(new OnClickListener(){
-			
-			public void onClick(View v) {
-				if(OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
-					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onPrevious();
-			}
-		});
-		
-		this.mCenterToButton.setOnClickListener(new OnClickListener(){
-			
-			public void onClick(View v) {
-				if(OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
-					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onCenter();
-			}
-		});
-		
-		this.mNavToButton.setOnClickListener(new OnClickListener(){
-			
-			public void onClick(View v) {
-				if(OpenStreetMapViewItemizedOverlayControlView.this.mLis != null)
-					OpenStreetMapViewItemizedOverlayControlView.this.mLis.onNavTo();
-			}
-		});
+	public void setNextEnabled(final boolean pEnabled) {
+		this.mNextButton.setEnabled(pEnabled);
 	}
-
+	
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
 	
-	public interface ItemizedOverlayControlViewListener{
-		public void onPrevious();
-		public void onNext();
-		public void onCenter();
-		public void onNavTo();
+	public void setPreviousEnabled(final boolean pEnabled) {
+		this.mPreviousButton.setEnabled(pEnabled);
 	}
 }
