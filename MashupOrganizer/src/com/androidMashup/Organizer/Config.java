@@ -19,4 +19,6 @@ public class Config {
 	
 	public static final String	PREF_FIRST_STARTUP	= "PREF_FIRST_STARTUP";
 	
+	public static final String	PREFERENCES			= "MASHUP_PREFERENCES";
+	
 }

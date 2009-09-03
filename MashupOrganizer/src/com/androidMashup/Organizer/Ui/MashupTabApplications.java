@@ -17,6 +17,7 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
@@ -69,6 +70,12 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	private static final int			DIALOG_APPLICATION_INFORMATION	= 0;
 	private static final int			INSTALL_DIALOG					= 1;
 	public static final int				CONTEXT_MENU_DEINSTALL			= 0;
+	private static final int			MENU_INFO						= 100;
+	
+	public void beforeRequest() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	public void onClick(DialogInterface dialog, int which) {
 		dialog.dismiss();
@@ -100,6 +107,8 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 		else if (dialog == showInfoDialog && which == DialogInterface.BUTTON_POSITIVE && applicationPackage != null) {
 			if (applicationPackage.length() > 0) {
 				Intent i = new Intent(Intent.ACTION_VIEW);
+				if (applicationActivityClass == null) applicationActivityClass = "";
+				if (applicationActivityClass == null) applicationPackage = "";
 				i.setComponent(new ComponentName(applicationPackage, applicationActivityClass));
 				try {
 					startActivity(i);
@@ -158,11 +167,13 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_LEFT_ICON);
 		setContentView(R.layout.layout_organizer_tabs_applications);
+		
+		getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, R.drawable.diagona069);
 		
 		myApp = (MyApplication) getApplication();
 		myApp.registeredActivities.add(this);
-		myApp.updateDataBase();
 		
 		updateListButton = (Button) findViewById(R.id.ApplicationsTab_updateList_Button);
 		updateListButton.setOnClickListener(this);
@@ -199,6 +210,19 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 		availableApplicationsListView.setAdapter(availableAppsAdapter);
 		availableApplicationsListView.setSelector(R.drawable.selection_overlay);
 		availableApplicationsListView.setOnItemClickListener(this);
+		
+		if (myApp.firstStartup) {
+			showAppInfo();
+		}
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		
+		menu.add(0, MENU_INFO, 1, R.string.info);
+		
+		return true;
 	}
 	
 	public void onItemClick(AdapterView<?> adapter, View v, int pos, long arg3) {
@@ -318,6 +342,9 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 				startActivity(uninstallIntent);
 				
 				break;
+			case MENU_INFO:
+				showAppInfo();
+				break;
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
@@ -334,6 +361,7 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		myApp.findInstalledApps();
 	}
 	
 	@Override
@@ -352,5 +380,20 @@ public class MashupTabApplications extends Activity implements OnClickListener, 
 	
 	public void refreshState() {
 		refreshDrawableStates();
+	}
+	
+	private void showAppInfo() {
+		TextView descriptionView = new TextView(this);
+		descriptionView.setText(R.string.infoText);
+		
+		installDialog = new AlertDialog.Builder(this)
+				.setNegativeButton("done", new android.content.DialogInterface.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						myApp.firstStartupDismissed();
+					}
+				}).setView(descriptionView).setTitle("Help").setCancelable(true).create();
+		installDialog.show();
+		
 	}
 }

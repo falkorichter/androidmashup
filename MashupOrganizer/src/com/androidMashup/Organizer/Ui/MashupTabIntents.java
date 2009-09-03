@@ -62,6 +62,10 @@ public class MashupTabIntents extends Activity implements OnClickListener, OnIte
 	private static final int	CONTEXT_MENU_MASHUP		= 1;
 	private static final int	CONTEXT_MENU_OPEN		= 2;
 	
+	public void beforeRequest() {
+		updateListButton.setEnabled(false);
+	}
+	
 	private void mashup(Cursor cursor) {
 		intentTitle = cursor.getString(cursor.getColumnIndex(MashupProvider.INTENT_TITLE));
 		intentAction = cursor.getString(cursor.getColumnIndex(MashupProvider.INTENT_ACTION));
@@ -173,7 +177,6 @@ public class MashupTabIntents extends Activity implements OnClickListener, OnIte
 		availableIntentsListView.setSelector(R.drawable.selection_overlay);
 		availableIntentsListView.setOnItemClickListener(this);
 		
-		refreshDrawableStates();
 	}
 	
 	public void onItemClick(AdapterView<?> adapter, View view, int pos, long arg3) {
@@ -254,6 +257,7 @@ public class MashupTabIntents extends Activity implements OnClickListener, OnIte
 	}
 	
 	public void refreshState() {
+		updateListButton.setEnabled(true);
 		refreshDrawableStates();
 	}
 	
