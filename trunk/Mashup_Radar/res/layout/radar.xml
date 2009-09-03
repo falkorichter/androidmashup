@@ -23,7 +23,7 @@
     android:layout_height="fill_parent"
     android:gravity="center_vertical"
     >
-	<com.google.android.radar.RadarView 
+	<org.mashup.radar.RadarView 
 		android:id="@+id/radar"
 		android:layout_width="320dip" 
 	    android:layout_height="320dip"
