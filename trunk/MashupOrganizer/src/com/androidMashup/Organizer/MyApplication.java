@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import android.app.Application;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
@@ -30,18 +32,33 @@ public class MyApplication extends Application implements Handler.Callback {
 																					.show();
 																		}
 																	};
-	private DatabaseHandler				handler;
+	private final Runnable				beforeRequestRunner			= new Runnable() {
+																		public void run() {
+																			beforeRequest();
+																		}
+																		
+																	};
 	
+	private DatabaseHandler				handler;
 	private Thread						runner;
 	
 	public ArrayList<IMashupActivity>	registeredActivities;
+	
 	private Handler						threadHandler;
+	public boolean						firstStartup;
+	
+	private void beforeRequest() {
+		for ( IMashupActivity activity : registeredActivities ) {
+			activity.beforeRequest();
+		}
+	}
 	
 	public void clearDatabase() {
 		runner = new Thread() {
 			@Override
 			public void run() {
 				try {
+					threadHandler.post(beforeRequestRunner);
 					handler.clearDataBase();
 					enabledIntentsCursor.requery();
 					installedAppsCursor.requery();
@@ -108,24 +125,33 @@ public class MyApplication extends Application implements Handler.Callback {
 	}
 	
 	public int findInstalledApps() {
-		runner = new Thread() {
-			@Override
-			public void run() {
-				try {
-					handler.findInstalledApps(getPackageManager());
-					installedAppsCursor.requery();
-					availableAppsCursor.requery();
-					
-				}
-				catch (Exception e) {
-				}
-				finally {
-					threadHandler.post(refreshRunner);
-				}
-			}
-		};
-		runner.start();
+		// runner = new Thread() {
+		// @Override
+		// public void run() {
+		// try {
+		// threadHandler.post(beforeRequestRunner);
+		handler.findInstalledApps(getPackageManager());
+		installedAppsCursor.requery();
+		availableAppsCursor.requery();
+		refreshViews();
+		//					
+		// }
+		// catch (Exception e) {
+		// }
+		// finally {
+		// threadHandler.post(refreshRunner);
+		// }
+		// }
+		// };
+		// runner.start();
 		return 0;
+	}
+	
+	public void firstStartupDismissed() {
+		SharedPreferences settings = getSharedPreferences(Config.PREFERENCES, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(Config.PREF_FIRST_STARTUP, false);
+		editor.commit();
 	}
 	
 	public boolean handleMessage(Message msg) {
@@ -138,14 +164,12 @@ public class MyApplication extends Application implements Handler.Callback {
 	}
 	
 	public void initAvailableAppsCursor() {
-		if (availableAppsCursor != null) return;
 		String query = MashupProvider.APPLICATION_INSTALLED + "='0'";
 		availableAppsCursor = dbAdapter
 				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, query, null, null, null, null, null);
 	}
 	
 	public void initAvailableIntentsCursor() {
-		if (availableIntentsCursor != null) return;
 		String query = MashupProvider.INTENT_ENABLED + "='0'";
 		availableIntentsCursor = dbAdapter
 				.query(MashupDbAdapter.DATABASE_INTENTS_TABLE, null, query, null, null, null, null, null);
@@ -156,7 +180,9 @@ public class MyApplication extends Application implements Handler.Callback {
 			@Override
 			public void run() {
 				try {
+					threadHandler.post(beforeRequestRunner);
 					handler.initDataBase();
+					handler.findInstalledApps(getPackageManager());
 					enabledIntentsCursor.requery();
 					installedAppsCursor.requery();
 					availableAppsCursor.requery();
@@ -174,7 +200,6 @@ public class MyApplication extends Application implements Handler.Callback {
 	}
 	
 	public void initEnabledIntentsCursor() {
-		if (enabledIntentsCursor != null) return;
 		String query = MashupProvider.INTENT_ENABLED + "='1'";
 		enabledIntentsCursor = dbAdapter
 				.query(MashupDbAdapter.DATABASE_INTENTS_TABLE, null, query, null, null, null, null, null);
@@ -182,7 +207,6 @@ public class MyApplication extends Application implements Handler.Callback {
 	}
 	
 	public void initInstalledAppsCursor() {
-		if (installedAppsCursor != null) return;
 		String query = MashupProvider.APPLICATION_INSTALLED + "='1'";
 		installedAppsCursor = dbAdapter
 				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, query, null, null, null, null, null);
@@ -192,10 +216,20 @@ public class MyApplication extends Application implements Handler.Callback {
 	public void onCreate() {
 		super.onCreate();
 		dbAdapter = MashupDbAdapter.getInstance(getApplicationContext());
+		
 		handler = DatabaseHandler.getInstance(this);
+		
 		registeredActivities = new ArrayList<IMashupActivity>();
+		
 		threadHandler = new Handler(this);
+		
 		dbAdapter.open();
+		
+		updateDataBase();
+		
+		SharedPreferences settings = getSharedPreferences(Config.PREFERENCES, Context.MODE_PRIVATE);
+		firstStartup = settings.getBoolean(Config.PREF_FIRST_STARTUP, true);
+		
 		initAvailableAppsCursor();
 		initAvailableIntentsCursor();
 		initEnabledIntentsCursor();
@@ -221,7 +255,9 @@ public class MyApplication extends Application implements Handler.Callback {
 			@Override
 			public void run() {
 				try {
+					threadHandler.post(beforeRequestRunner);
 					handler.updateDataBase();
+					handler.findInstalledApps(getPackageManager());
 					enabledIntentsCursor.requery();
 					installedAppsCursor.requery();
 					availableAppsCursor.requery();

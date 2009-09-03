@@ -21,7 +21,16 @@ OpenFONMaps is based on the OpenStreetmap implementation by http://code.google.c
 \n
 if you have any questions write an email to info@androidmashup.org\n
 \n
-\n 
-   
+\n    
 </string>
+
+<string
+		name="info">help</string>
+		
+	<string name="infoText">Welcome to the Mashup-Organizer\n
+This app is still in development, if you have any comments write an email to info@androidmashup.org\n
+You can find applications here that support mashup! features. Click on the available list, read the description and install. 
+This is part of my bachelor thesis, if you encounter any bugs, please report them. 
+
+</string>	
 </resources>
