@@ -126,8 +126,7 @@ public class MashupProvider extends ContentProvider {
 			break;
 		}
 
-		mDbAdapter.open();
-		Cursor c = qBuilder.query(mDbAdapter.getSqliteDatabase(), projection,
+		Cursor c = qBuilder.query(mDbAdapter.getReadableDatabase(), projection,
 				selection, selectionArgs, null, null, sortOrder);
 
 		return c;

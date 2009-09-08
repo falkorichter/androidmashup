@@ -333,8 +333,8 @@ public class MashupDbAdapter {
 		return intents;
 	}
 
-	public SQLiteDatabase getSqliteDatabase() {
-		return mDb;
+	public SQLiteDatabase getReadableDatabase() {
+		return mDbHelper.getReadableDatabase();
 	}
 
 	public long insertMashupApplication(MashupApplication app) {
