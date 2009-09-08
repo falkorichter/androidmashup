@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmlns:uml2tools.notation="http://www.eclipse.org/mdt/uml2tools/gmf/notation/ext/2008" xmi:id="_IcggcJmEEd6O39V44w09XA" type="UMLUseCase" name="usecases.umlusc" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_I7TVQJmEEd6O39V44w09XA" type="2001" fontName="Lucida Grande">
+    <children xmi:type="notation:DecorationNode" xmi:id="_I7TVQpmEEd6O39V44w09XA" type="5001"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_I7TVQ5mEEd6O39V44w09XA" type="5016"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_I7TVRJmEEd6O39V44w09XA" type="7001" collapsed="true">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_I7TVRZmEEd6O39V44w09XA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_I7TVRpmEEd6O39V44w09XA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_I7TVR5mEEd6O39V44w09XA"/>
+    </children>
+    <element xmi:type="uml:Package" href="usecases.uml#_IaaOsJmEEd6O39V44w09XA"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_I7TVQZmEEd6O39V44w09XA"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_IcggcZmEEd6O39V44w09XA"/>
+  <styles xmi:type="uml2tools.notation:U2TDiagramCanonicalStyle" xmi:id="_IcggcpmEEd6O39V44w09XA"/>
+  <element xmi:type="uml:Package" href="usecases.uml#_IaaOsJmEEd6O39V44w09XA"/>
+</notation:Diagram>
