@@ -1,60 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:versionCode="1"
-	android:versionName="1.0"
-	package="org.mashup.panoramio">
-	<application
-		android:icon="@drawable/icon">
-		<activity
-			android:label="@string/app_name"
-			android:theme="@style/Theme.Panoramio"
-			android:name=".activities.Panoramio"
-			android:launchMode="singleTask">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="org.mashup.panoramio" android:versionName="1.02" android:versionCode="3">
+	<application android:icon="@drawable/icon">
+		<activity android:label="@string/app_name" android:theme="@style/Theme.Panoramio"
+			android:name=".activities.Panoramio" android:launchMode="singleTask">
 			<intent-filter>
-				<action
-					android:name="android.intent.action.MAIN" />
-				<category
-					android:name="android.intent.category.LAUNCHER" />
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 			<intent-filter>
-				<action
-					android:name="com.google.android.panoramio.SHOW_MAP"></action>
-				<category
-					android:name="android.intent.category.DEFAULT"></category>
+				<action android:name="com.google.android.panoramio.SHOW_MAP"></action>
+				<category android:name="android.intent.category.DEFAULT"></category>
 			</intent-filter>
 			<intent-filter>
-				<action
-					android:name="com.androidMashup.GEO_POINT" />
-				<category
-					android:name="android.intent.category.DEFAULT" />
+				<action android:name="com.androidMashup.GEO_POINT" />
+				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 			<intent-filter>
-				<action
-					android:name="com.androidMashup.MAP_VIEW" />
-				<category
-					android:name="android.intent.category.DEFAULT" />
+				<action android:name="com.androidMashup.MAP_VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.ALTERNATIVE" />
+				<category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+
+
 			</intent-filter>
 		</activity>
-		<activity
-			android:label="@string/app_name"
-			android:theme="@android:style/Theme.Light"
+		<activity android:label="@string/app_name" android:theme="@android:style/Theme.Light"
 			android:name=".activities.ImageList" />
-		<activity
-			android:label="@string/app_name"
-			android:theme="@style/Theme.Panoramio"
+		<activity android:label="@string/app_name" android:theme="@style/Theme.Panoramio"
 			android:name=".activities.ViewImage" />
-		<activity
-			android:label="@string/app_name"
-			android:name=".activities.ViewMap" />
-		<uses-library
-			android:name="com.google.android.maps" />
+		<activity android:label="@string/app_name" android:name=".activities.ViewMap" />
+		<uses-library android:name="com.google.android.maps" />
 	</application>
-	<uses-permission
-		android:name="android.permission.INTERNET" />
-	<uses-permission
-		android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission
-		android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-sdk android:minSdkVersion="3"></uses-sdk>
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-sdk android:minSdkVersion="3"></uses-sdk>
 </manifest>
