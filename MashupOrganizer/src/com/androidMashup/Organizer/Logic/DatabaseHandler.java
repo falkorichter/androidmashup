@@ -24,25 +24,25 @@ import com.androidMashup.Organizer.DataTypes.MashupIntent;
 import com.androidMashup.provider.MashupProvider;
 
 public class DatabaseHandler {
-	
+
 	public final static int			MODE_UPDATE	= 1;
 	public final static int			MODE_INIT	= 2;
-	
+
 	private final MashupDbAdapter	db;
 	private URL						url			= null;
 	private SAXParser				sp			= null;
 	private XMLReader				xr;
 	private MashupXmlHandler		xmlHandler;
 	private static DatabaseHandler	instance	= null;
-	
+
 	public static DatabaseHandler getInstance(Context ctx) {
 		if (instance == null) {
 			instance = new DatabaseHandler(ctx);
 		}
-		
+
 		return instance;
 	}
-	
+
 	private DatabaseHandler(Context ctx) {
 		db = MashupDbAdapter.getInstance(ctx);
 		url = Config.MASHUP_DATA_URL;
@@ -52,91 +52,138 @@ public class DatabaseHandler {
 			sp = spf.newSAXParser();
 			/* Get the XMLReader of the SAXParser we created. */
 			xr = sp.getXMLReader();
-			
-		}
-		catch (Exception e) {
+
+		} catch (Exception e) {
 			sp = null;
 			xr = null;
 		}
 	}
-	
+
 	public void clearDataBase() throws Exception {
 		db.open();
 		db.clearDataBase();
 		db.close();
 	}
-	
+
 	public int findInstalledApps(PackageManager packageManager) {
 		ArrayList<MashupIntent> intents = getIntents();
-		if (intents.size() == 0) return 0;
+		if (intents.size() == 0)
+			return 0;
 		db.open();
-		
-		Cursor countCursor = db
-				.query(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null, MashupProvider.APPLICATION_INSTALLED + "=1", null, null, null, null, null);
+
+		Cursor countCursor = db.query(
+				MashupProvider.DATABASE_APPLICATIONS_TABLE, null,
+				MashupProvider.APPLICATION_INSTALLED + "=1", null, null, null,
+				null, null);
 		int countBefore = countCursor.getCount();
-		
+
 		ContentValues values = new ContentValues();
 		values.put(MashupProvider.APPLICATION_INSTALLED, 0);
-		db.update(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, values, null, null);
-		
-		for ( MashupIntent mashupIntent : intents ) {
+		db.update(MashupProvider.DATABASE_APPLICATIONS_TABLE, values, null,
+				null);
+
+		for (MashupIntent mashupIntent : intents) {
 			Intent queryIntent = new Intent();
 			queryIntent.setAction(mashupIntent.action);
-			
-			List<ResolveInfo> list = packageManager.queryIntentActivities(queryIntent, 0);
-			for ( ResolveInfo resolveInfo : list ) {
-				db.markAsInstalled(resolveInfo.activityInfo.packageName, resolveInfo.loadLabel(packageManager)
-						.toString(), resolveInfo.activityInfo.name);
+
+			List<ResolveInfo> list = packageManager.queryIntentActivities(
+					queryIntent, 0);
+			for (ResolveInfo resolveInfo : list) {
+				db.markAsInstalled(resolveInfo.activityInfo.packageName,
+						resolveInfo.loadLabel(packageManager).toString(),
+						resolveInfo.activityInfo.name);
 			}
 		}
 		countCursor.requery();
 		int countAfter = countCursor.getCount();
 		db.close();
 		return countAfter - countBefore;
-		
+
 	}
-	
+
 	public ArrayList<MashupApplication> getApplications() {
 		ArrayList<MashupApplication> applications = null;
 		try {
 			db.open();
 			applications = db.getAllApplications();
-		}
-		finally {
+		} finally {
 			db.close();
 		}
 		db.close();
 		return applications;
 	}
-	
+
 	public ArrayList<MashupIntent> getIntents() {
 		ArrayList<MashupIntent> intents = null;
 		try {
 			db.open();
 			intents = db.getAllIntents();
-		}
-		finally {
+		} finally {
 			db.close();
 		}
-		
+
 		return intents;
 	}
-	
+
 	public int initDataBase() throws Exception {
 		// catch SQLException on the first init
 		try {
 			clearDataBase();
+		} catch (SQLException e) {
 		}
-		catch (SQLException e) {
-		}
-		
+
 		/* Parse the xml-data from our URL. */
 		xmlHandler = MashupXmlHandler.getInstance(db, MODE_INIT);
 		xr.setContentHandler(xmlHandler);
 		xr.parse(new InputSource(url.openStream()));
 		return xmlHandler.insertCount;
 	}
-	
+
+	// public void markIntentsAsInstalled() {
+	// db.open();
+	//
+	// ContentValues values = new ContentValues();
+	// values.put(MashupProvider.INTENT_ENABLED, 0);
+	// db.update(MashupProvider.DATABASE_INTENTS_TABLE, values, null, null);
+	//
+	// String query = "SELECT DISTINCT "
+	//
+	// + MashupProvider.DATABASE_INTENTS_TABLE + "."
+	// + MashupProvider.INTENT_KEY_ROWID + " as _id "
+	//
+	// + "FROM " + MashupProvider.DATABASE_APPLICATIONS_TABLE
+	//
+	// + " INNER JOIN " + MashupProvider.DATABASE_RELATION_TABLE
+	//
+	// + " ON " + MashupProvider.DATABASE_RELATION_TABLE + "."
+	// + MashupProvider.RELATION_APPLICATION_WEB_ID
+	//
+	// + " = " + MashupProvider.DATABASE_APPLICATIONS_TABLE + "."
+	// + MashupProvider.APPLICATION_WEB_ID + " " +
+	//
+	// "INNER JOIN " + MashupProvider.DATABASE_INTENTS_TABLE
+	//
+	// + " ON " + MashupProvider.DATABASE_RELATION_TABLE + "."
+	// + MashupProvider.RELATION_INTENT_WEB_ID
+	//
+	// + " = " + MashupProvider.DATABASE_INTENTS_TABLE + "."
+	// + MashupProvider.INTENT_WEB_ID
+	//
+	// + " WHERE " + MashupProvider.DATABASE_APPLICATIONS_TABLE + "."
+	// + MashupProvider.APPLICATION_INSTALLED + "=1 ";
+	// Cursor c = db.rawQuery(query, null);
+	//
+	// values = new ContentValues();
+	// values.put(MashupProvider.INTENT_ENABLED, 1);
+	// do {
+	// String where = MashupProvider.INTENT_KEY_ROWID + "=" + c.getInt(1);
+	// db.update(MashupProvider.DATABASE_INTENTS_TABLE, values, where,
+	// null);
+	// } while (c.moveToNext());
+	//
+	// db.close();
+	// }
+
 	public int updateDataBase() throws Exception {
 		/* Parse the xml-data from our URL. */
 		xmlHandler = MashupXmlHandler.getInstance(db, MODE_UPDATE);

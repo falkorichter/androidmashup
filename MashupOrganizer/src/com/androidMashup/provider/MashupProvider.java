@@ -1,5 +1,7 @@
 package com.androidMashup.provider;
 
+import java.util.List;
+
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -33,6 +35,16 @@ public class MashupProvider extends ContentProvider {
 	public static final String		INTENT_TITLE				= "title";
 	public static final String		INTENT_WEB_ID				= "_webId";
 	public static final String		INTENT_APPLICATIONCOUNT		= "applicationCount";
+
+	public static final String		RELATION_APPLICATION_WEB_ID	= "application_webId";
+	public static final String		RELATION_INTENT_WEB_ID		= "intent_webId";
+	public static final String		RELATION_KEY_ROWID			= "_id";
+	public static final String		RELATION_MASHUP_ENABLED		= "mashupEnabled";
+
+	// FIXME make private again
+	public static final String		DATABASE_APPLICATIONS_TABLE	= "applications";
+	public static final String		DATABASE_INTENTS_TABLE		= "intents";
+	public static final String		DATABASE_RELATION_TABLE		= "intents_applications";
 
 	public static final Uri			CONTENT_URI					= Uri
 																		.parse("content://com.mashup.mashupdataprovider");
@@ -109,25 +121,78 @@ public class MashupProvider extends ContentProvider {
 
 		SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
 
-		switch (uriMatcher.match(uri)) {
-		case ALL_APPLICATIONS:
-			qBuilder.setTables(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE);
-			qBuilder.appendWhere(APPLICATION_INSTALLED + "='1'");
-			break;
-		case SINGLE_APPLICATION:
-			qBuilder.setTables(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE);
-			qBuilder.appendWhere(APPLICATION_INSTALLED + "='1'");
-			break;
-		case ALL_INTENTS:
-			qBuilder.setTables(MashupDbAdapter.DATABASE_INTENTS_TABLE);
-			break;
-		case SINGLE_INTENT:
-			qBuilder.setTables(MashupDbAdapter.DATABASE_INTENTS_TABLE);
-			break;
+		Cursor c = null;
+
+		List<String> arguments = uri.getPathSegments();
+		if (arguments.size() < 2) {
+			throw new IllegalArgumentException(
+					"you must specify the intent action and optional the application package that should be exluded");
 		}
 
-		Cursor c = qBuilder.query(mDbAdapter.getReadableDatabase(), projection,
-				selection, selectionArgs, null, null, sortOrder);
+		if (arguments.get(0).equals("application")) {
+			String intentAction = arguments.get(1);
+
+			String query = "SELECT "
+
+			+ DATABASE_APPLICATIONS_TABLE + "." + APPLICATION_KEY_ROWID + ", "
+					+ DATABASE_APPLICATIONS_TABLE + "." + APPLICATION_PACKAGE
+					+ ", " + DATABASE_APPLICATIONS_TABLE + "."
+					+ APPLICATION_ACTIVITY_CLASS + ", "
+					+ DATABASE_APPLICATIONS_TABLE + "." + APPLICATION_NAME
+					+ " "
+
+					+ "FROM " + DATABASE_APPLICATIONS_TABLE
+
+					+ " INNER JOIN " + DATABASE_RELATION_TABLE
+
+					+ " ON " + DATABASE_RELATION_TABLE + "."
+					+ RELATION_APPLICATION_WEB_ID
+
+					+ " = " + DATABASE_APPLICATIONS_TABLE + "."
+					+ APPLICATION_WEB_ID + " " +
+
+					"INNER JOIN " + DATABASE_INTENTS_TABLE
+
+					+ " ON " + DATABASE_RELATION_TABLE + "."
+					+ RELATION_INTENT_WEB_ID
+
+					+ " = " + DATABASE_INTENTS_TABLE + "." + INTENT_WEB_ID
+
+					+ " WHERE " + DATABASE_INTENTS_TABLE + "." + INTENT_ACTION
+					+ "='" + intentAction + "' "
+
+					+ "AND " + DATABASE_APPLICATIONS_TABLE + "."
+					+ APPLICATION_INSTALLED + "=1 "
+
+					+ "AND " + DATABASE_RELATION_TABLE + "."
+					+ RELATION_MASHUP_ENABLED + "=1 ";
+
+			if (arguments.size() > 2) {
+				query += "AND " + DATABASE_APPLICATIONS_TABLE + "."
+						+ APPLICATION_PACKAGE + "!='" + arguments.get(2) + "'";
+			}
+
+			c = mDbAdapter.rawQuery(query, null);
+		}
+
+		// switch (uriMatcher.match(uri)) {
+		// case ALL_APPLICATIONS:
+		// qBuilder.setTables(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE);
+		// qBuilder.appendWhere(APPLICATION_INSTALLED + "='1'");
+		// break;
+		// case SINGLE_APPLICATION:
+		// qBuilder.setTables(MashupDbAdapter.DATABASE_APPLICATIONS_TABLE);
+		// qBuilder.appendWhere(APPLICATION_INSTALLED + "='1'");
+		// break;
+		// case ALL_INTENTS:
+		// qBuilder.setTables(MashupDbAdapter.DATABASE_INTENTS_TABLE);
+		// break;
+		// case SINGLE_INTENT:
+		// qBuilder.setTables(MashupDbAdapter.DATABASE_INTENTS_TABLE);
+		// break;
+		// }
+		// c = qBuilder.query(mDbAdapter.getReadableDatabase(), projection,
+		// selection, selectionArgs, null, null, sortOrder);
 
 		return c;
 

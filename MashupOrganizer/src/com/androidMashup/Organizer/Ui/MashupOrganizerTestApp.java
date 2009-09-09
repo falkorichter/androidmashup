@@ -78,7 +78,9 @@ public class MashupOrganizerTestApp extends Activity implements OnClickListener 
 
 				// Get the base URI for the People table in the Contacts
 				// content provider.
-				Uri aplications = MashupProvider.CONTENT_APPLICATION;
+				Uri aplications = Uri
+						.parse("content://com.mashup.mashupdataprovider/application/"
+								+ intent_edit.getText().toString());
 
 				// Make the query.
 				Cursor managedCursor = managedQuery(aplications, projection,
@@ -113,8 +115,8 @@ public class MashupOrganizerTestApp extends Activity implements OnClickListener 
 						.getInstance(getApplicationContext());
 				db.open();
 				managedCursor = db.query(
-						MashupDbAdapter.DATABASE_APPLICATIONS_TABLE, null,
-						null, null, null, null, null, null);
+						MashupProvider.DATABASE_APPLICATIONS_TABLE, null, null,
+						null, null, null, null, null);
 
 				console.setText(console.getText() + "\n"
 						+ managedCursor.getCount() + "items found");
@@ -139,7 +141,6 @@ public class MashupOrganizerTestApp extends Activity implements OnClickListener 
 				mPackageManager = getPackageManager();
 				queryIntent = new Intent();
 				queryIntent.setAction(intent_edit.getText().toString());
-				// queryIntent.setClassName("com.fon.fonMaps", "FONMaps");
 
 				List<ResolveInfo> list = mPackageManager.queryIntentActivities(
 						queryIntent, 0);

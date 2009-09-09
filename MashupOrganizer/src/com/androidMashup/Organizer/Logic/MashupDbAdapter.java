@@ -26,9 +26,10 @@ public class MashupDbAdapter {
 		}
 
 		public void clearAllTables(SQLiteDatabase db) {
-			db.execSQL("DELETE FROM " + DATABASE_APPLICATIONS_TABLE);
-			db.execSQL("DELETE FROM " + DATABASE_INTENTS_TABLE);
-			db.execSQL("DELETE FROM " + DATABASE_RELATION_TABLE);
+			db.execSQL("DELETE FROM "
+					+ MashupProvider.DATABASE_APPLICATIONS_TABLE);
+			db.execSQL("DELETE FROM " + MashupProvider.DATABASE_INTENTS_TABLE);
+			db.execSQL("DELETE FROM " + MashupProvider.DATABASE_RELATION_TABLE);
 		}
 
 		@Override
@@ -49,29 +50,24 @@ public class MashupDbAdapter {
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			Log.i("Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS " + DATABASE_APPLICATIONS_TABLE);
-			db.execSQL("DROP TABLE IF EXISTS " + DATABASE_INTENTS_TABLE);
-			db.execSQL("DROP TABLE IF EXISTS " + DATABASE_RELATION_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS "
+					+ MashupProvider.DATABASE_APPLICATIONS_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS "
+					+ MashupProvider.DATABASE_INTENTS_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS "
+					+ MashupProvider.DATABASE_RELATION_TABLE);
 			onCreate(db);
 		}
 	}
 
-	public static final String		RELATION_APPLICATION_WEB_ID			= "application_webId";
-	public static final String		RELATION_INTENT_WEB_ID				= "intent_webId";
-	public static final String		RELATION_KEY_ROWID					= "_id";
-
-	// FIXME make private again
-	public static final String		DATABASE_APPLICATIONS_TABLE			= "applications";
-	public static final String		DATABASE_INTENTS_TABLE				= "intents";
-	public static final String		DATABASE_RELATION_TABLE				= "intents_applications";
 	private static final String		DATABASE_NAME						= "mashup.db";
 
-	private static final int		DATABASE_VERSION					= 10;
+	private static final int		DATABASE_VERSION					= 12;
 	/**
 	 * Database creation sql statement
 	 */
 	private static final String		DATABASE_CREATE_TABLE_APPLICATIONS	= "create table "
-																				+ DATABASE_APPLICATIONS_TABLE
+																				+ MashupProvider.DATABASE_APPLICATIONS_TABLE
 																				+ " ("
 																				+ MashupProvider.APPLICATION_KEY_ROWID
 																				+ " integer primary key autoincrement,"
@@ -99,7 +95,7 @@ public class MashupDbAdapter {
 																				+ " integer not null default 0"
 																				+ ");";
 	private static final String		DATABASE_CREATE_TABLE_INTENTS		= "create table "
-																				+ DATABASE_INTENTS_TABLE
+																				+ MashupProvider.DATABASE_INTENTS_TABLE
 																				+ " ("
 																				+ MashupProvider.INTENT_KEY_ROWID
 																				+ " integer primary key autoincrement,"
@@ -117,21 +113,23 @@ public class MashupDbAdapter {
 																				+ " integer not null default 0"
 																				+ ");";
 	private static final String		DATABASE_CREATE_TABLE_RELATION		= "create table "
-																				+ DATABASE_RELATION_TABLE
+																				+ MashupProvider.DATABASE_RELATION_TABLE
 																				+ " ("
-																				+ RELATION_KEY_ROWID
+																				+ MashupProvider.RELATION_KEY_ROWID
 																				+ " integer primary key autoincrement,"
-																				+ RELATION_APPLICATION_WEB_ID
+																				+ MashupProvider.RELATION_APPLICATION_WEB_ID
 																				+ " integer not null,"
-																				+ RELATION_INTENT_WEB_ID
-																				+ " integer not null);";
+																				+ MashupProvider.RELATION_INTENT_WEB_ID
+																				+ " integer not null,"
+																				+ MashupProvider.RELATION_MASHUP_ENABLED
+																				+ " integer not null default 1);";
 	private static final String		DATABASE_CREATE_TRIGGER_APPLICATION	= "CREATE TRIGGER delete_relation_application AFTER  DELETE ON "
-																				+ DATABASE_APPLICATIONS_TABLE
+																				+ MashupProvider.DATABASE_APPLICATIONS_TABLE
 																				+ " BEGIN "
 																				+ "DELETE from "
-																				+ DATABASE_RELATION_TABLE
+																				+ MashupProvider.DATABASE_RELATION_TABLE
 																				+ "  WHERE "
-																				+ RELATION_APPLICATION_WEB_ID
+																				+ MashupProvider.RELATION_APPLICATION_WEB_ID
 																				+ " = OLD."
 																				+ MashupProvider.APPLICATION_WEB_ID
 																				+ ";"
@@ -140,12 +138,12 @@ public class MashupDbAdapter {
 
 	// triggers that represent constraint ON DELETE CASACADE
 	private static final String		DATABASE_CREATE_TRIGGER_INTENT		= "CREATE TRIGGER delete_relation_intent AFTER  DELETE ON "
-																				+ DATABASE_INTENTS_TABLE
+																				+ MashupProvider.DATABASE_INTENTS_TABLE
 																				+ " BEGIN "
 																				+ " DELETE from "
-																				+ DATABASE_RELATION_TABLE
+																				+ MashupProvider.DATABASE_RELATION_TABLE
 																				+ "  WHERE "
-																				+ RELATION_INTENT_WEB_ID
+																				+ MashupProvider.RELATION_INTENT_WEB_ID
 																				+ " = OLD."
 																				+ MashupProvider.INTENT_WEB_ID
 																				+ ";"
@@ -160,8 +158,8 @@ public class MashupDbAdapter {
 	public static MashupDbAdapter getInstance(Context ctx) {
 		if (instance == null) {
 			instance = new MashupDbAdapter(ctx);
-		} else {
 		}
+
 		return instance;
 	}
 
@@ -186,12 +184,12 @@ public class MashupDbAdapter {
 	}
 
 	public boolean deleteApplication(long rowId) {
-		return mDb.delete(DATABASE_INTENTS_TABLE,
+		return mDb.delete(MashupProvider.DATABASE_INTENTS_TABLE,
 				MashupProvider.APPLICATION_KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean deleteApplicationByWebId(long webId) {
-		return mDb.delete(DATABASE_INTENTS_TABLE,
+		return mDb.delete(MashupProvider.DATABASE_INTENTS_TABLE,
 				MashupProvider.APPLICATION_WEB_ID + "=" + webId, null) > 0;
 	}
 
@@ -203,40 +201,31 @@ public class MashupDbAdapter {
 	 * @return true if deleted, false otherwise
 	 */
 	public boolean deleteIntent(long rowId) {
-		return mDb.delete(DATABASE_INTENTS_TABLE,
+		return mDb.delete(MashupProvider.DATABASE_INTENTS_TABLE,
 				MashupProvider.INTENT_KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean deleteIntentByWebId(long webId) {
-		return mDb.delete(DATABASE_INTENTS_TABLE, MashupProvider.INTENT_WEB_ID
-				+ "=" + webId, null) > 0;
+		return mDb.delete(MashupProvider.DATABASE_INTENTS_TABLE,
+				MashupProvider.INTENT_WEB_ID + "=" + webId, null) > 0;
 	}
 
 	public Cursor fetchAllApplications() {
-		return mDb.query(DATABASE_APPLICATIONS_TABLE, null, null, null, null,
-				null, null);
+		return mDb.query(MashupProvider.DATABASE_APPLICATIONS_TABLE, null,
+				null, null, null, null, null);
 	}
 
 	public Cursor fetchAllIntents() {
-		return mDb.query(DATABASE_INTENTS_TABLE, null, null, null, null, null,
-				null);
+		return mDb.query(MashupProvider.DATABASE_INTENTS_TABLE, null, null,
+				null, null, null, null);
 
 	}
 
-	/**
-	 * Return a Cursor positioned at the note that matches the given rowId
-	 * 
-	 * @param rowId
-	 *            id of note to retrieve
-	 * @return Cursor positioned to matching note, if found
-	 * @throws SQLException
-	 *             if note could not be found/retrieved
-	 */
 	public Cursor fetchIntent(long rowId) throws SQLException {
 
 		Cursor mCursor =
 
-		mDb.query(true, DATABASE_INTENTS_TABLE, null,
+		mDb.query(true, MashupProvider.DATABASE_INTENTS_TABLE, null,
 				MashupProvider.INTENT_KEY_ROWID + "=" + rowId, null, null,
 				null, null, null);
 		if (mCursor != null) {
@@ -333,10 +322,6 @@ public class MashupDbAdapter {
 		return intents;
 	}
 
-	public SQLiteDatabase getReadableDatabase() {
-		return mDbHelper.getReadableDatabase();
-	}
-
 	public long insertMashupApplication(MashupApplication app) {
 		ContentValues initialValues = new ContentValues();
 		initialValues.put(MashupProvider.APPLICATION_WEB_ID, app.webId);
@@ -354,7 +339,8 @@ public class MashupDbAdapter {
 				app.description);
 		initialValues.put(MashupProvider.APPLICATION_ACTIVITY_CLASS,
 				app.activityClass);
-		return mDb.insert(DATABASE_APPLICATIONS_TABLE, null, initialValues);
+		return mDb.insert(MashupProvider.DATABASE_APPLICATIONS_TABLE, null,
+				initialValues);
 	}
 
 	public long insertMashupIntent(MashupIntent intent) {
@@ -365,50 +351,8 @@ public class MashupDbAdapter {
 				.put(MashupProvider.INTENT_DESCRIPTION, intent.description);
 		initialValues.put(MashupProvider.INTENT_ICON, intent.icon);
 		initialValues.put(MashupProvider.INTENT_TITLE, intent.title);
-		return mDb.insert(DATABASE_INTENTS_TABLE, null, initialValues);
-	}
-
-	public Cursor intentsWithApplicationCount(int enabled) {
-
-		/**
-		 * SELECT intents.description , intents.icon , intents.title ,
-		 * intents.action, intents.enabled, count(intents_applications._id) as
-		 * applicationCount FROM intents INNER JOIN intents_applications ON
-		 * intents._id = intents_applications.intent_id where intents.enabled =
-		 * 1
-		 */
-		String sql = "SELECT "
-
-		+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_ACTION + ","
-
-		+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_DESCRIPTION
-				+ ","
-
-				+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_ENABLED
-				+ ","
-
-				+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_ICON
-				+ ","
-
-				+ DATABASE_INTENTS_TABLE + "."
-				+ MashupProvider.INTENT_KEY_ROWID + ","
-
-				+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_TITLE
-				+ ","
-
-				+ DATABASE_INTENTS_TABLE + "." + MashupProvider.INTENT_WEB_ID
-				+ ","
-
-				+ "count(intents_applications._id) as "
-				+ MashupProvider.INTENT_APPLICATIONCOUNT
-
-				+ "FROM " + DATABASE_INTENTS_TABLE + " INNER JOIN "
-				+ DATABASE_RELATION_TABLE
-
-				+ "ON " + DATABASE_INTENTS_TABLE + "."
-				+ MashupProvider.APPLICATION_KEY_ROWID + " = "
-				+ DATABASE_RELATION_TABLE + "." + RELATION_INTENT_WEB_ID;
-		return mDb.rawQuery(sql, null);
+		return mDb.insert(MashupProvider.DATABASE_INTENTS_TABLE, null,
+				initialValues);
 	}
 
 	public int markAsInstalled(String packageName, String name,
@@ -421,8 +365,8 @@ public class MashupDbAdapter {
 		String query = MashupProvider.APPLICATION_PACKAGE + "='" + packageName
 				+ "' AND " + MashupProvider.APPLICATION_NAME + "='" + name
 				+ "'";
-		int updates = mDb
-				.update(DATABASE_APPLICATIONS_TABLE, args, query, null);
+		int updates = mDb.update(MashupProvider.DATABASE_APPLICATIONS_TABLE,
+				args, query, null);
 		if (updates != 0) {
 			Log.i("mark as installed application with packageName: '"
 					+ packageName + "' and name: " + name);
@@ -449,14 +393,15 @@ public class MashupDbAdapter {
 
 	public Cursor provideApplications(String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		return mDb.query(DATABASE_APPLICATIONS_TABLE, projection, selection,
-				selectionArgs, null, null, null, sortOrder);
+		return mDb.query(MashupProvider.DATABASE_APPLICATIONS_TABLE,
+				projection, selection, selectionArgs, null, null, null,
+				sortOrder);
 	}
 
 	public Cursor provideIntents(String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		return mDb.query(DATABASE_INTENTS_TABLE, projection, selection,
-				selectionArgs, null, null, null, sortOrder);
+		return mDb.query(MashupProvider.DATABASE_INTENTS_TABLE, projection,
+				selection, selectionArgs, null, null, null, sortOrder);
 	}
 
 	public Cursor query(String table, String[] columns, String selection,
@@ -464,6 +409,13 @@ public class MashupDbAdapter {
 			String orderBy, String limit) {
 		return mDb.query(table, columns, selection, selectionArgs, groupBy,
 				having, orderBy, limit);
+	}
+
+	public Cursor rawQuery(String sql, String[] selectionArgs) {
+		if (!mDb.isOpen()) {
+			mDb = mDbHelper.getReadableDatabase();
+		}
+		return mDb.rawQuery(sql, selectionArgs);
 	}
 
 	public int update(String table, ContentValues values, String whereClause,
@@ -487,9 +439,9 @@ public class MashupDbAdapter {
 		args.put(MashupProvider.APPLICATION_DESCRIPTION, app.description);
 		args.put(MashupProvider.APPLICATION_ACTIVITY_CLASS, app.activityClass);
 
-		if (mDb.update(DATABASE_APPLICATIONS_TABLE, args,
+		if (mDb.update(MashupProvider.DATABASE_APPLICATIONS_TABLE, args,
 				MashupProvider.APPLICATION_WEB_ID + "=" + app.webId, null) == 0) {
-			mDb.insert(DATABASE_APPLICATIONS_TABLE, null, args);
+			mDb.insert(MashupProvider.DATABASE_APPLICATIONS_TABLE, null, args);
 			Log.i("inserting application '" + app.name + "' with webId "
 					+ app.webId);
 			return 1;
@@ -508,9 +460,9 @@ public class MashupDbAdapter {
 		args.put(MashupProvider.INTENT_ICON, intent.icon);
 		args.put(MashupProvider.INTENT_TITLE, intent.title);
 
-		if (mDb.update(DATABASE_INTENTS_TABLE, args,
+		if (mDb.update(MashupProvider.DATABASE_INTENTS_TABLE, args,
 				MashupProvider.INTENT_WEB_ID + "=" + intent.webId, null) == 0) {
-			mDb.insert(DATABASE_INTENTS_TABLE, null, args);
+			mDb.insert(MashupProvider.DATABASE_INTENTS_TABLE, null, args);
 			Log.i("inserting intent '" + intent.title + "' with webId "
 					+ intent.webId);
 			return 1;
@@ -522,17 +474,21 @@ public class MashupDbAdapter {
 
 	public int updateOrInsertRelation(long intentId, long applicationId) {
 		ContentValues initialValues = new ContentValues();
-		initialValues.put(RELATION_INTENT_WEB_ID, intentId);
-		initialValues.put(RELATION_APPLICATION_WEB_ID, applicationId);
+		initialValues.put(MashupProvider.RELATION_INTENT_WEB_ID, intentId);
+		initialValues.put(MashupProvider.RELATION_APPLICATION_WEB_ID,
+				applicationId);
 
-		String query = RELATION_INTENT_WEB_ID + "=" + intentId + " AND "
-				+ RELATION_APPLICATION_WEB_ID + "=" + applicationId;
-		Cursor entryExists = mDb.query(true, DATABASE_RELATION_TABLE,
-				new String[] { RELATION_INTENT_WEB_ID,
-						RELATION_APPLICATION_WEB_ID }, query, null, null, null,
-				null, null);
+		String query = MashupProvider.RELATION_INTENT_WEB_ID + "=" + intentId
+				+ " AND " + MashupProvider.RELATION_APPLICATION_WEB_ID + "="
+				+ applicationId;
+		Cursor entryExists = mDb.query(true,
+				MashupProvider.DATABASE_RELATION_TABLE, new String[] {
+						MashupProvider.RELATION_INTENT_WEB_ID,
+						MashupProvider.RELATION_APPLICATION_WEB_ID }, query,
+				null, null, null, null, null);
 		if (entryExists.getCount() == 0) {
-			mDb.insert(DATABASE_RELATION_TABLE, null, initialValues);
+			mDb.insert(MashupProvider.DATABASE_RELATION_TABLE, null,
+					initialValues);
 			Log.i("inserting relation beetween intent(webId): '" + intentId
 					+ "' and application(webId) " + applicationId);
 			entryExists.close();
@@ -548,7 +504,7 @@ public class MashupDbAdapter {
 	//		
 	// Cursor mCursor =
 	//			
-	// mDb.query(true, DATABASE_INTENTS_TABLE, new String[]
+	// mDb.query(true, MashupProvider.DATABASE_INTENTS_TABLE, new String[]
 	// {APPLICATION_KEY_ROWID, APPLICATION_KEY_CLASS_NAME,
 	// APPLICATION_ICON, APPLICATION_NAME, APPLICATION_URL},
 	// APPLICATION_KEY_ROWID + "=" + rowId, null,
@@ -578,7 +534,8 @@ public class MashupDbAdapter {
 	// args.put(INTENT_ACTION, intent.getAction());
 	// args.put(INTENT_DESCRIPTION, intent.getDescription());
 	//		
-	// return mDb.update(DATABASE_INTENTS_TABLE, args, INTENT_KEY_ROWID + "=" +
+	// return mDb.update(MashupProvider.DATABASE_INTENTS_TABLE, args,
+	// INTENT_KEY_ROWID + "=" +
 	// intent.getId(), null) > 0;
 	// }
 	//	
@@ -590,7 +547,8 @@ public class MashupDbAdapter {
 	// args.put(APPLICATION_APK_URL, app.getApk_url().toString());
 	// args.put(APPLICATION_URL, app.getUrl());
 	//		
-	// return mDb.update(DATABASE_INTENTS_TABLE, args, APPLICATION_KEY_ROWID +
+	// return mDb.update(MashupProvider.DATABASE_INTENTS_TABLE, args,
+	// APPLICATION_KEY_ROWID +
 	// "=" + app.getId(), null) > 0;
 	// }
 
