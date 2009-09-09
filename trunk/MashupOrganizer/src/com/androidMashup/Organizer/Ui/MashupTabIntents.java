@@ -176,7 +176,7 @@ public class MashupTabIntents extends Activity implements OnClickListener,
 		setContentView(R.layout.layout_organizer_tabs_intent);
 
 		myApp = (MyApplication) getApplication();
-		myApp.registeredActivities.add(this);
+		myApp.registerActivity(this);
 
 		updateListButton = (Button) findViewById(R.id.IntentsTab_updateList_Button);
 		updateListButton.setOnClickListener(this);

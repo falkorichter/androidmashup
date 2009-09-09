@@ -26,11 +26,11 @@ public class MashupOrganizer extends TabActivity implements IMashupActivity {
 		requestWindowFeature(Window.FEATURE_LEFT_ICON);
 
 		myApp = (MyApplication) getApplication();
-		myApp.registeredActivities.add(this);
+		myApp.registerActivity(this);
 		final TabHost tabHost = getTabHost();
 
-		tabHost.addTab(tabHost.newTabSpec("test").setIndicator("tests")
-				.setContent(new Intent(this, MashupOrganizerTestApp.class)));
+		// tabHost.addTab(tabHost.newTabSpec("test").setIndicator("tests")
+		// .setContent(new Intent(this, MashupOrganizerTestApp.class)));
 
 		tabHost.addTab(tabHost.newTabSpec("apps").setIndicator("apps",
 				getResources().getDrawable(R.drawable.diagona069)).setContent(
