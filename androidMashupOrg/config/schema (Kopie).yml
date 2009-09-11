@@ -1,0 +1,62 @@
+propel:
+  _attributes:
+    package: lib.model
+    defaultIdMethod: native
+  application:
+    _attributes: { phpName: Application }
+    id_application: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    package: { type: VARCHAR, size: '45', required: true }
+    name: { type: VARCHAR, size: '45', required: true }
+    url: { type: VARCHAR, size: '45', required: false }
+    icon: { type: VARCHAR, size: '45', required: false }
+    apk_url: { type: VARCHAR, size: '45', required: false }
+    developer_id: { type: INTEGER, size: '11', required: true, foreignTable: developer, foreignReference: id_developer, onDelete: RESTRICT, onUpdate: RESTRICT }
+    _indexes: { fk_application_developer: [developer_id] }
+  application_has_intent:
+    _attributes: { phpName: ApplicationHasIntent }
+    id_application_has_intent: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    application_id: { type: INTEGER, size: '11', required: true, foreignTable: application, foreignReference: id_application, onDelete: RESTRICT, onUpdate: RESTRICT }
+    intent_id: { type: INTEGER, size: '11', required: true, foreignTable: intent, foreignReference: id_intent, onDelete: RESTRICT, onUpdate: RESTRICT }
+    _indexes: { fk_application_has_intent_application: [application_id], fk_application_has_intent_intent: [intent_id] }
+  developer:
+    _attributes: { phpName: Developer }
+    id_developer: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    username: { type: VARCHAR, size: '45', required: true }
+    url: { type: VARCHAR, size: '45', required: false }
+    email: { type: VARCHAR, size: '45', required: true }
+  extra:
+    _attributes: { phpName: Extra }
+    id_extra: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    name: { type: VARCHAR, size: '45', required: false }
+    description: { type: VARCHAR, size: '45', required: false }
+    extraType_id: { type: INTEGER, size: '11', required: true, foreignTable: extraType, foreignReference: id_extraType, onDelete: CASCADE, onUpdate: CASCADE }
+    _indexes: { fk_extra_extraType: [extraType_id] }
+  extraType:
+    _attributes: { phpName: Extratype }
+    id_extraType: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    name: { type: VARCHAR, size: '45', required: false }
+    description: { type: VARCHAR, size: '45', required: false }
+  intent:
+    _attributes: { phpName: Intent }
+    id_intent: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    description: { type: VARCHAR, size: '45', required: false }
+    action: { type: VARCHAR, size: '45', required: true }
+    mashup: { type: TINYINT, size: '1', required: true, defaultValue: '0' }
+  intentCategory:
+    _attributes: { phpName: Intentcategory }
+    id_intentCategory: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    name: { type: VARCHAR, size: '45', required: false }
+    description: { type: VARCHAR, size: '45', required: false }
+  intent_belongsTo_intentCategory:
+    _attributes: { phpName: IntentBelongstoIntentcategory }
+    id_intent_belongsTo_intentCategory: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    intent_id: { type: INTEGER, size: '11', required: false, foreignTable: intent, foreignReference: id_intent, onDelete: RESTRICT, onUpdate: RESTRICT }
+    intentCategory_id: { type: INTEGER, size: '11', required: false, foreignTable: intentCategory, foreignReference: id_intentCategory, onDelete: RESTRICT, onUpdate: RESTRICT }
+    _indexes: { fk_intent_has_intentCategory_intent: [intent_id], fk_intent_has_intentCategory_intentCategory: [intentCategory_id] }
+  intent_handles_extra:
+    _attributes: { phpName: IntentHandlesExtra }
+    id_intent_handles_extra: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
+    intent_id: { type: INTEGER, size: '11', required: false, foreignTable: intent, foreignReference: id_intent, onDelete: RESTRICT, onUpdate: RESTRICT }
+    extra_id: { type: INTEGER, size: '11', required: false, foreignTable: extra, foreignReference: id_extra, onDelete: RESTRICT, onUpdate: RESTRICT }
+    mandatory: { type: VARCHAR, size: '45', required: false }
+    _indexes: { fk_intent_has_extra_intent: [intent_id], fk_intent_has_extra_extra: [extra_id] }
