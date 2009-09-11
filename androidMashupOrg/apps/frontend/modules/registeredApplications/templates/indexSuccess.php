@@ -3,11 +3,27 @@
 <?
 foreach ( $applications as $application ) {
 	$developer = $application->getDeveloper();?>
-	<h2><?= $application->getName()?></h2>
 	
+	<? if(strlen($application->getApkUrl()) != 0){?>
+	<div style="float:right;">
+		<img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=<?=  $application->getApkUrl();?>" >
+	<p>direct download</p>
+	</div>
+	<? } 
+	else {?>
+	<div style="float:right;">
+		<img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=market://search?q=pname:<?=  $application->getPackage();?>" >
+	<p>market download</p>
+	</div>
+	<? }?><h2><?= $application->getName()?></h2>
+	
+	<!--
 	<? if(strlen($application->getIcon()) != 0){?>
-	<img src="<?= $application->getIcon()?>"/ style="float:right;">
+	<img src="<?= $application->getIcon()?>"/>
 	<? } ?>
+		-->
+
+	
 	
 	
 	<? if(strlen($application->getUrl()) != 0){?>

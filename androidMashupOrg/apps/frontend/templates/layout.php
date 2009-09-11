@@ -13,7 +13,7 @@
 
 <div id="container">
 
-<div id="header"><h1>Androidmashup.org</h1></div>
+<div id="header"><h1><a href="/">Androidmashup.org</a></h1></div>
 
 <div id="sub_header">... make Android apps understand each other</div>
 
@@ -57,7 +57,15 @@
 <div id="footer"><strong>CC-BY 2009</strong> | <a href="androidmashup.org">androidmashup.org</a> | <b>Design by</b> <a href="http://www.pikanai.com">Pikanai.com</a></div>
 
 </div>
-
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-8453702-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
 </body>
 
 </html>
