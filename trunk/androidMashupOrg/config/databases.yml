@@ -1,0 +1,13 @@
+all:
+  propel:
+    class:        sfPropelDatabase
+    param:
+      classname:  PropelPDO
+      dsn:        mysql:dbname=mashup;host=localhost
+      username:   www-data
+      password:   www-data
+      encoding:   utf8
+      persistent: true
+      pooling:    true
+
+
