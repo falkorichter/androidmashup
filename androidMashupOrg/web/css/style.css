@@ -115,3 +115,8 @@ a.menu_link:hover {
 	font-weight: bold;
 	font-style: italic
 }
+blockquote{
+	border:solid black 1px;
+	background-color: #cccccc;
+	padding: 4px;
+}
