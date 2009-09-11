@@ -54,7 +54,7 @@ class xmlActions extends sfActions {
 						'developerUrl="'.$developer->getUrl().'" ' .
 						'id="'.$application->getPrimaryKey().'" ' .
 						'>';
-				$xml .= '<description>sample sample</description>';
+				$xml .= '<description>'.$application->getDescription().'</description>';
 
 				$intents = $application->getIntents();
 				foreach ( $intents as $intent ) {
