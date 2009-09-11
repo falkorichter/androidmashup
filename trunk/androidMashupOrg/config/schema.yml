@@ -7,6 +7,7 @@ propel:
     id_application: { type: INTEGER, size: '11', primaryKey: true, autoIncrement: true, required: true }
     package: { type: VARCHAR, size: '45', required: true }
     name: { type: VARCHAR, size: '45', required: true }
+    description: { type: LONGVARCHAR, required: false }
     url: { type: VARCHAR, size: '45', required: false }
     icon: { type: VARCHAR, size: '45', required: false }
     apk_url: { type: LONGVARCHAR, required: false }
