@@ -15,6 +15,25 @@ class Application extends BaseApplication
      }
      return $intents;
   }
+  public function getMashupIntents($c = null) {
+     $intents = array();
+     foreach($this->getApplicationHasIntentsJoinIntent($c) as $ref) {
+     if($ref->getIntent()->getMashup() == 1){
+        $intents[] = $ref->getIntent();
+        }
+     }
+     return $intents;
+  }
+    public function getPrivateIntents($c = null) {
+     $intents = array();
+     foreach($this->getApplicationHasIntentsJoinIntent($c) as $ref) {
+     if($ref->getIntent()->getMashup() == 0){
+        $intents[] = $ref->getIntent();
+        }
+     }
+     return $intents;
+  }
+
   public function __toString(){
   	return $this->getName();
   }
