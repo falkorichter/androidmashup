@@ -3,15 +3,16 @@ default:
     content-type: text/html
 
   metas:
-    #title:        symfony project
-    #description:  symfony project
+    title:        androidmashup.org - make Android apps understand each other
+    description:  a bachelors thesis project..
     #keywords:     symfony, project
-    #language:     en
-    #robots:       index, follow
+    language:     en
+    robots:       index, follow
 
-  stylesheets:    [main.css]
+  stylesheets:    [main.css, style.css]
 
   javascripts:    []
 
   has_layout:     on
-  layout:         xmlLayout
+  layout:         layout
+
