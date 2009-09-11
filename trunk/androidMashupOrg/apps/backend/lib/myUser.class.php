@@ -1,5 +1,0 @@
-<?
-class myUser extends sfGuardSecurityUser
-    {
-    }
-?>
