@@ -15,6 +15,7 @@ foreach ( $mashupIntents as $mashupIntent ) {?>
 		<li>
 			key: <?=  $extra->getName ();?></br>
 			type:<?=  $extra->getExtratype ()->getName ();?> (<?=  $extra->getExtratype ()->getDescription ();?> )</br>
+			<?= $extra->getRelationDescription ();?>
 			
 		<? }?>
 		</li>
@@ -26,7 +27,8 @@ foreach ( $mashupIntents as $mashupIntent ) {?>
 	<? if ($extra->isMandatory () == "false"){ ?>
 		<li>
 			key: <?=  $extra->getName ();?></br>
-			type:<?=  $extra->getExtratype ()->getName ();?>(<?=  $extra->getExtratype ()->getDescription ();?> )</br>
+			type:<?=  $extra->getExtratype ()->getName ();?> (<?=  $extra->getExtratype ()->getDescription ();?> )</br>
+			<?= $extra->getRelationDescription ();?>
 		<? }?>
 		</li>
 	<? }?>
@@ -49,7 +51,8 @@ foreach ( $mashupIntents as $mashupIntent ) {?>
 	to retrieve data from this Intent:
 	<blockquote>
 	  	 <? foreach ( $extras as $extra ) {?>
-			<?= $extra->getExtratype ()->getName ();?> <?=  $extra->getName ()?> = recieve.get<?=  $extra->getExtratype ()->getName ()?>Extra("<?=  $extra->getName ();?>", DEFAULT_VALUE);</br>
+			<?= $extra->getExtratype ()->getName ();?> <?=  $extra->getName ()?> = 
+			<?=  $extra->getExtratype ()->getJavaRetrieveCommand ()?>("<?=  $extra->getName ();?>", DEFAULT_VALUE);</br>
 		<? }?> 	
 		
 	</blockquote>
